@@ -1,4 +1,4 @@
-# Testing IronMan-Arsenal(Kinetic)
+# Testing kineticlib
 
 This repo is full of tests to ensure our software is working now, and will keep
 working as we add more code.
