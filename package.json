@@ -25,7 +25,8 @@
   },
   "homepage": "https://github.com/scality/IronMan-Arsenal#readme",
   "dependencies": {
-    "protobufjs": "^4.0.0"
+    "protobufjs": "^4.0.0",
+    "winston": "^1.1.0"
   },
   "devDependencies": {
     "mocha": "^2.3.3",
@@ -33,8 +34,7 @@
     "babel-eslint": "^4.1.3",
     "eslint": "^1.5.1",
     "eslint-config-airbnb": "^0.0.9",
-    "eslint-config-ironman": "scality/IronMan-Guidelines",
-    "winston": "^1.1.0"
+    "eslint-config-ironman": "scality/IronMan-Guidelines"
   },
   "scripts": {
     "lint": "node_modules/.bin/eslint $(git ls-files '*.js')",
