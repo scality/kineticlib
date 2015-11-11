@@ -46,14 +46,13 @@ function requestsLauncher(request, client) {
         pdu = new kinetic.SetClusterVersionPDU(incrementTCP, 1234, 0);
     }
 
-    pdu.send(client);
+    pdu.pipe(client, { end: false });
     incrementTCP++;
 }
 
 function checkTest(request, requestResponse, done) {
-    const client = new net.Socket();
-    client.connect(PORT, HOST, function firstConn() {
-    });
+    const client = net.connect(PORT, HOST);
+
     client.on('data', function heandleData(data) {
         const pdu = new kinetic.PDU();
         try {
@@ -85,7 +84,7 @@ function checkTest(request, requestResponse, done) {
                 const k = new kinetic.SetClusterVersionPDU(
                     incrementTCP, 0, 1234);
                 try {
-                    k.send(client);
+                    k.pipe(client, { end: false });
                 } catch (e) {
                     done(e);
                 }

@@ -1,5 +1,4 @@
 import assert from 'assert';
-import stream from 'stream';
 import util from 'util';
 
 import winston from 'winston';
@@ -357,18 +356,9 @@ describe('kinetic.PDU constructor()', () => {
     });
 });
 
-describe('kinetic.PDU send()', () => {
+describe('kinetic.PDU _read()', () => {
     it('should write valid NOOP', (done) => {
-        const sock = new stream.PassThrough();
-
-        const k = new kinetic.NoOpPDU(123, 9876798);
-        try {
-            k.send(sock);
-        } catch (e) {
-            done(e);
-        }
-
-        const result = sock.read();
+        const result = new kinetic.NoOpPDU(123, 9876798).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -383,20 +373,12 @@ describe('kinetic.PDU send()', () => {
 
         done();
     });
-    it('should write valid PUT', (done) => {
-        const sock = new stream.PassThrough();
 
+    it('should write valid PUT', (done) => {
         const k = new kinetic.PutPDU(new Buffer('qwer'), 0,
             new Buffer(0), new Buffer('1'), 0);
         k.setChunk(new Buffer("ON DIT BONJOUR TOUT LE MONDE"));
-
-        try {
-            k.send(sock);
-        } catch (e) {
-            done(e);
-        }
-
-        const result = sock.read();
+        const result = k.read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x3e\x00\x00\x00\x1c\x20\x01\x2a\x18\x08\x01\x12" +
@@ -412,18 +394,9 @@ describe('kinetic.PDU send()', () => {
 
         done();
     });
+
     it('should write valid GET', (done) => {
-        const sock = new stream.PassThrough();
-
-        const k = new kinetic.GetPDU(new Buffer('qwer'), 0, 0);
-
-        try {
-            k.send(sock);
-        } catch (e) {
-            done(e);
-        }
-
-        const result = sock.read();
+        const result = new kinetic.GetPDU(new Buffer('qwer'), 0, 0).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x37\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -439,19 +412,10 @@ describe('kinetic.PDU send()', () => {
 
         done();
     });
+
     it('should write valid DELETE', (done) => {
-        const sock = new stream.PassThrough();
-
-        const k = new kinetic.DeletePDU(new Buffer('qwer'), 0, 0,
-            new Buffer('1234'));
-
-        try {
-            k.send(sock);
-        } catch (e) {
-            done(e);
-        }
-
-        const result = sock.read();
+        const result = new kinetic.DeletePDU(new Buffer('qwer'), 0, 0,
+            new Buffer('1234')).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x3f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -467,18 +431,9 @@ describe('kinetic.PDU send()', () => {
 
         done();
     });
+
     it('should write valid FLUSH', (done) => {
-        const sock = new stream.PassThrough();
-
-        const k = new kinetic.FlushPDU(0, 0);
-
-        try {
-            k.send(sock);
-        } catch (e) {
-            done(e);
-        }
-
-        const result = sock.read();
+        const result = new kinetic.FlushPDU(0, 0).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x2f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -494,18 +449,9 @@ describe('kinetic.PDU send()', () => {
 
         done();
     });
+
     it('should write valid GETLOG', (done) => {
-        const sock = new stream.PassThrough();
-
-        const k = new kinetic.GetLogPDU(0, [0, 1, 2, 4, 5, 6], 0);
-
-        try {
-            k.send(sock);
-        } catch (e) {
-            done(e);
-        }
-
-        const result = sock.read();
+        const result = new kinetic.GetLogPDU(0, [0, 1, 2, 4, 5, 6], 0).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x3d\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
