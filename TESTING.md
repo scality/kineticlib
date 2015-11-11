@@ -37,11 +37,11 @@ Unit tests are located in the `tests/unit` directory.
 ```node
 import fs from 'fs';
 
-import { Kinetic } from '../index.js';
+import kinetic from '../index.js';
 
 let rawData = undefined;
 
-const k = new Kinetic.NoOpPDU(123, 9876798);
+const k = new kinetic.NoOpPDU(123, 9876798);
 
 
 // if you want a put, you need a chunk : 
@@ -50,7 +50,7 @@ const k = new Kinetic.NoOpPDU(123, 9876798);
 
 const pduHeader = new Buffer(9);
 
-pduHeader.writeInt8(Kinetic.getVersion(), 0);
+pduHeader.writeInt8(kinetic.getVersion(), 0);
 
 pduHeader.writeInt32BE(k.getProtobufSize(), 1);
 pduHeader.writeInt32BE(k.getChunkSize(), 5);
@@ -90,7 +90,7 @@ function writeHex(request) {
     let result = '';
 
     for (let i = 0; i < file.length; i += 2) {
-        result += '/x${file[i]}${file[i + 1]}';
+        result += '\\x${file[i]}${file[i + 1]}';
     }
     fs.writeFileSync(request + '_Hexatify', result);
 }
