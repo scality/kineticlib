@@ -21,7 +21,8 @@ const requestsArr = [
     ['noop', 'NOOP_RESPONSE'],
     ['flush', 'FLUSH_RESPONSE'],
     ['getLog', 'GETLOG_RESPONSE'],
-    ['setClusterVersion', 'SETUP_RESPONSE']
+    ['setClusterVersion', 'SETUP_RESPONSE'],
+    ['setClusterVersionTo0', 'SETUP_RESPONSE']
 ];
 
 function requestsLauncher(request, client) {
@@ -44,22 +45,23 @@ function requestsLauncher(request, client) {
         pdu = new kinetic.GetLogPDU(incrementTCP, [0, 1, 2, 4, 5, 6], 0);
     } else if (request === 'setClusterVersion') {
         pdu = new kinetic.SetClusterVersionPDU(incrementTCP, 1234, 0);
+    } else if (request === 'setClusterVersionTo0') {
+        pdu = new kinetic.SetClusterVersionPDU(incrementTCP, 0, 1234);
     }
 
-    pdu.send(client);
+    pdu.pipe(client, { end: false });
     incrementTCP++;
 }
 
 function checkTest(request, requestResponse, done) {
-    const client = new net.Socket();
-    client.connect(PORT, HOST, function firstConn() {
-    });
+    const client = net.connect(PORT, HOST);
+
     client.on('data', function heandleData(data) {
-        const pdu = new kinetic.PDU();
+        let pdu;
         try {
-            pdu._parse(data);
+            pdu = new kinetic.PDU(data);
         } catch (e) {
-            done(e);
+            return done(e);
         }
         if (pdu.getMessageType() === null ||
             kinetic.getOpName(pdu.getMessageType()) !== requestResponse) {
@@ -74,21 +76,12 @@ function checkTest(request, requestResponse, done) {
                 kinetic.errors.SUCCESS);
             assert.deepEqual(kinetic.getOpName(pdu.getMessageType()),
                 requestResponse);
+
             if (request === 'get') {
                 assert.deepEqual(pdu.getChunk(),
                     new Buffer("ON DIT BONJOUR TOUT LE MONDE"));
                 assert.equal(pdu.getKey(), "qwer");
                 assert.equal(pdu.getDbVersion(), '1');
-            }
-
-            if (requestResponse === 'SETUP_RESPONSE') {
-                const k = new kinetic.SetClusterVersionPDU(
-                    incrementTCP, 0, 1234);
-                try {
-                    k.send(client);
-                } catch (e) {
-                    done(e);
-                }
             }
 
             client.end();
