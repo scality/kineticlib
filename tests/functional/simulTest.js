@@ -21,7 +21,8 @@ const requestsArr = [
     ['noop', 'NOOP_RESPONSE'],
     ['flush', 'FLUSH_RESPONSE'],
     ['getLog', 'GETLOG_RESPONSE'],
-    ['setClusterVersion', 'SETUP_RESPONSE']
+    ['setClusterVersion', 'SETUP_RESPONSE'],
+    ['setClusterVersionTo0', 'SETUP_RESPONSE']
 ];
 
 function requestsLauncher(request, client) {
@@ -44,6 +45,8 @@ function requestsLauncher(request, client) {
         pdu = new kinetic.GetLogPDU(incrementTCP, [0, 1, 2, 4, 5, 6], 0);
     } else if (request === 'setClusterVersion') {
         pdu = new kinetic.SetClusterVersionPDU(incrementTCP, 1234, 0);
+    } else if (request === 'setClusterVersionTo0') {
+        pdu = new kinetic.SetClusterVersionPDU(incrementTCP, 0, 1234);
     }
 
     pdu.pipe(client, { end: false });
@@ -73,21 +76,12 @@ function checkTest(request, requestResponse, done) {
                 kinetic.errors.SUCCESS);
             assert.deepEqual(kinetic.getOpName(pdu.getMessageType()),
                 requestResponse);
+
             if (request === 'get') {
                 assert.deepEqual(pdu.getChunk(),
                     new Buffer("ON DIT BONJOUR TOUT LE MONDE"));
                 assert.equal(pdu.getKey(), "qwer");
                 assert.equal(pdu.getDbVersion(), '1');
-            }
-
-            if (requestResponse === 'SETUP_RESPONSE') {
-                const k = new kinetic.SetClusterVersionPDU(
-                    incrementTCP, 0, 1234);
-                try {
-                    k.pipe(client, { end: false });
-                } catch (e) {
-                    done(e);
-                }
             }
 
             client.end();
