@@ -36,69 +36,6 @@ describe('kinetic.PDU constructor()', () => {
         }
     });
 
-    it('should parse Version failure NOOP', (done) => {
-        const rawData = new Buffer(
-            "\x47\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa\x53\xb4\x15" +
-            "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
-            "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12\x00", "ascii");
-
-        try {
-            const pdu = new kinetic.PDU(rawData);
-            logger.info(util.inspect(pdu.getProtobuf(),
-                {showHidden: false, depth: null}));
-
-            done(new Error('Bad error throwing in _parse/constructor()'));
-        } catch (e) {
-            if (e.badVersion === true && e.message === 'version failure')
-                done();
-            else
-                done(e);
-        }
-    });
-
-    it('should parse bad chunk NOOP', (done) => {
-        const rawData = new Buffer(
-            "\x46\x00\x00\x00\x32\x00\x00\x00\x10\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa\x53\xb4\x15" +
-            "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
-            "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12\x00", "ascii");
-
-        try {
-            const pdu = new kinetic.PDU(rawData);
-            logger.info(util.inspect(pdu.getProtobuf(),
-                {showHidden: false, depth: null}));
-
-            done(new Error('Bad error throwing in _parse/constructor()'));
-        } catch (e) {
-            if (e.badChunk && e.message === 'bad chunk')
-                done();
-            else
-                done(e);
-        }
-    });
-
-    it('should parse hmac failure NOOP', (done) => {
-        const rawData = new Buffer(
-            "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x22\xd1\x93\xfa\x53\xb4\x15" +
-            "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
-            "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12\x00", "ascii");
-
-        try {
-            const pdu = new kinetic.PDU(rawData);
-            logger.info(util.inspect(pdu.getProtobuf(),
-                {showHidden: false, depth: null}));
-
-            done(new Error('Bad error throwing in _parse/constructor()'));
-        } catch (e) {
-            if (e.hmacFail && e.message === 'HMAC does not match')
-                done();
-            else
-                done(e);
-        }
-    });
-
     it('should parse valid NOOP_RESPONSE', (done) => {
         const rawData = new Buffer(
             "\x46\x00\x00\x00\x2f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -318,6 +255,104 @@ describe('kinetic.PDU constructor()', () => {
             done();
         } catch (e) {
             done(e);
+        }
+    });
+
+    it('should detect PDU with invalid version', (done) => {
+        const rawData = new Buffer(
+            "\x47\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa\x53\xb4\x15" +
+            "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
+            "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12\x00", "ascii");
+
+        try {
+            const pdu = new kinetic.PDU(rawData);
+            logger.info(util.inspect(pdu.getProtobuf(),
+                {showHidden: false, depth: null}));
+
+            done(new Error('Bad error throwing in _parse/constructor()'));
+        } catch (e) {
+            if (e.badVersion)
+                done();
+            else
+                done(e);
+        }
+    });
+
+    it('should detect PDU with truncated header', (done) => {
+        const rawData = new Buffer(
+            "\x46\x00\x00\x01\x7f\x00\x00\x00\x00", "ascii");
+
+        try {
+            const pdu = new kinetic.PDU(rawData);
+            pdu;
+            done(new Error("No error thrown"));
+        } catch (e) {
+            if (e.badLength)
+                done();
+            else
+                done(e);
+        }
+    });
+
+    it('should detect PDU with truncated message', (done) => {
+        const rawData = new Buffer(
+            "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa\x53\xb4\x15" +
+            "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
+            "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12", "ascii");
+
+        try {
+            const pdu = new kinetic.PDU(rawData);
+            pdu;
+            done(new Error("No error thrown"));
+        } catch (e) {
+            if (e.badLength)
+                done();
+            else
+                done(e);
+        }
+    });
+
+    it('should detect PDU with truncated chunk', (done) => {
+        const rawData = new Buffer(
+            "\x46\x00\x00\x00\x41\x00\x00\x00\x28\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x3b\xad\xea\x16\x6f\x8b\x37\xff\xf6\xd6\x0d\x03\x24\xf1\xb5" +
+            "\x53\xa9\x14\xbb\xc6\x3a\x23\x0a\x0e\x08\xc5\x0f\x18\xf8\x87\xcd" +
+            "\xf4\x8c\x2a\x20\x01\x38\x04\x12\x11\x0a\x0f\x12\x01\xe3\x1a\x05" +
+            "mykey\x22\x01\xe3\x48\x01D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t",
+            "ascii");
+
+        try {
+            const pdu = new kinetic.PDU(rawData);
+            pdu;
+            done(new Error("No error thrown"));
+        } catch (e) {
+            if (e.badLength)
+                done();
+            else
+                done(e);
+        }
+    });
+
+    it('should detect PDU with bad HMAC', (done) => {
+        const rawData = new Buffer(
+            "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x22\xd1\x93\xfa\x53\xb4\x15" +
+            "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
+            "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12\x00", "ascii");
+
+        try {
+            const pdu = new kinetic.PDU(rawData);
+            logger.info(util.inspect(pdu.getProtobuf(),
+                {showHidden: false, depth: null}));
+
+            done(new Error('Bad error throwing in _parse/constructor()'));
+        } catch (e) {
+            if (e.hmacFail)
+                done();
+            else
+                done(e);
         }
     });
 });
