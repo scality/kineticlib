@@ -54,11 +54,11 @@ function checkTest(request, requestResponse, done) {
     const client = net.connect(PORT, HOST);
 
     client.on('data', function heandleData(data) {
-        const pdu = new kinetic.PDU();
+        let pdu;
         try {
-            pdu._parse(data);
+            pdu = new kinetic.PDU(data);
         } catch (e) {
-            done(e);
+            return done(e);
         }
         if (pdu.getMessageType() === null ||
             kinetic.getOpName(pdu.getMessageType()) !== requestResponse) {
