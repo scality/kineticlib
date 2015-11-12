@@ -28,6 +28,7 @@ describe('kinetic.PDU constructor()', () => {
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP);
             assert.deepEqual(pdu.getClusterVersion(), 9876798);
+            assert.deepEqual(pdu.getSequence(), 123);
 
             done();
         } catch (e) {
@@ -47,6 +48,7 @@ describe('kinetic.PDU constructor()', () => {
             assert.deepEqual(pdu.getProtobufSize(), 17);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP_RESPONSE);
+            assert.deepEqual(pdu.getSequence(), 2);
 
             done();
         } catch (e) {
@@ -69,6 +71,7 @@ describe('kinetic.PDU constructor()', () => {
             assert.deepEqual(pdu.getChunkSize(), 40);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.PUT);
             assert.deepEqual(pdu.getClusterVersion(), 1989);
+            assert.deepEqual(pdu.getSequence(), 1);
             assert.deepEqual(pdu.getKey(), new Buffer("mykey"));
             assert(pdu.getChunk().equals(
                 new Buffer("D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4")));
@@ -92,6 +95,7 @@ describe('kinetic.PDU constructor()', () => {
             assert.deepEqual(pdu.getProtobufSize(), 21);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.PUT_RESPONSE);
+            assert.deepEqual(pdu.getSequence(), 0);
 
             done();
         } catch (e) {
@@ -136,6 +140,7 @@ describe('kinetic.PDU constructor()', () => {
             assert.deepEqual(pdu.getProtobufSize(), 31);
             assert.deepEqual(pdu.getChunkSize(), 28);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GET_RESPONSE);
+            assert.deepEqual(pdu.getSequence(), 1);
             assert.deepEqual(pdu.getKey(), new Buffer("qwer"));
             assert(pdu.getChunk().equals(
                 new Buffer("ON DIT BONJOUR TOUT LE MONDE")));
@@ -160,6 +165,7 @@ describe('kinetic.PDU constructor()', () => {
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.FLUSH);
             assert.deepEqual(pdu.getClusterVersion(), 0);
+            assert.deepEqual(pdu.getSequence(), 3);
 
             done();
         } catch (e) {
@@ -181,6 +187,7 @@ describe('kinetic.PDU constructor()', () => {
             assert.deepEqual(pdu.getProtobufSize(), 17);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.FLUSH_RESPONSE);
+            assert.deepEqual(pdu.getSequence(), 3);
 
             done();
         } catch (e) {
@@ -203,6 +210,7 @@ describe('kinetic.PDU constructor()', () => {
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GETLOG);
             assert.deepEqual(pdu.getClusterVersion(), 0);
+            assert.deepEqual(pdu.getSequence(), 4);
 
             done();
         } catch (e) {
@@ -249,6 +257,7 @@ describe('kinetic.PDU constructor()', () => {
             assert.deepEqual(pdu.getProtobufSize(), 352);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GETLOG_RESPONSE);
+            assert.deepEqual(pdu.getSequence(), 4);
             assert.deepEqual(pdu._message.body.getLog.types,
                 [0, 1, 2, 4, 5, 6]);
             done();
