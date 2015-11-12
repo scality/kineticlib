@@ -764,3 +764,42 @@ describe('kinetic.DeletePDU()', () => {
         }
     });
 });
+
+describe('kinetic LONG number getters ', () => {
+    it('should decode Long sequence to number max:922337203685477600',
+        (done) => {
+            const rawData = new kinetic.NoOpPDU(9223372036854776001, 12).read();
+            const k = new kinetic.PDU(rawData);
+
+            assert.deepEqual(k.getSequence(), 9223372036854776000);
+            logger.info(k.getProtobuf().header.sequence);
+            logger.info(k.getSequence());
+
+            done();
+        });
+
+    it('should decode LONG ackSequence to number max:9223372036854776000',
+        (done) => {
+            const rawData = new kinetic.NoOpResponsePDU(9223372036854776000, 1,
+                new Buffer(0)).read();
+            const k = new kinetic.PDU(rawData);
+
+            assert.deepEqual(k.getSequence(), 9223372036854776000);
+            logger.info(k.getProtobuf().header.ackSequence);
+            logger.info(k.getSequence());
+
+            done();
+        });
+
+    it('should decode LONG clusterVersion to number max:9223372036854776000',
+        (done) => {
+            const rawData = new kinetic.NoOpPDU(1, 9223372036854776000).read();
+            const k = new kinetic.PDU(rawData);
+
+            assert.deepEqual(k.getClusterVersion(), 9223372036854776000);
+            logger.info(k.getProtobuf().header.clusterVersion);
+            logger.info(k.getClusterVersion());
+
+            done();
+        });
+});
