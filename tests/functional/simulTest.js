@@ -80,8 +80,8 @@ function checkTest(request, requestResponse, done) {
             if (request === 'get') {
                 assert.deepEqual(pdu.getChunk(),
                     new Buffer("ON DIT BONJOUR TOUT LE MONDE"));
-                assert.equal(pdu.getKey(), "qwer");
-                assert.equal(pdu.getDbVersion(), '1');
+                assert.deepEqual(pdu.getKey(), new Buffer("qwer"));
+                assert.deepEqual(pdu.getDbVersion(), new Buffer('1'));
             }
 
             client.end();
