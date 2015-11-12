@@ -38,8 +38,6 @@ pdu.pipe(sock, { end: false });
 Decode a PDU message from a buffer:
 
 ```js
-import kinetic from 'kineticlib';
-
 const rawData = new Buffer('\x46\x00\x00\x00\x32\x00' ... );
 
 const pdu = new kinetic.PDU(rawData);
@@ -49,14 +47,24 @@ process.stdout.write("Received " + kinetic.getOpName(type) + " PDU.\n");
 
 if (type === kinetic.ops.GET) {
     process.stdout.write("Peer is trying to GET key " + pdu.getKey() + ".\n");
-}
+```
+
+Asynchronously decode a PDU from a stream (e.g. a socket):
+
+```js
+kinetic.streamToPDU(socket, (err, pdu) => {
+    if (err)
+        process.stdout.write("... something bad happened\n");
+    else
+        process.stdout.write("... bytes transformed into a PDU!\n");
+});
+
+process.stdout.write("receiving bytes...\n");
 ```
 
 Handle a decoding error:
 
 ```js
-import kinetic from 'kineticlib';
-
 const badBuffer = new Buffer('\x46\x00\x00\x00\x32\x00');
 
 try {
