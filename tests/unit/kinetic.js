@@ -375,7 +375,7 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid NOOP_RESPONSE', (done) => {
-        const result = new kinetic.NoOpResponsePDU(1, new Buffer(0), 1).read();
+        const result = new kinetic.NoOpResponsePDU(1, 1, new Buffer(0)).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x2a\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -389,8 +389,8 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid PUT', (done) => {
-        const k = new kinetic.PutPDU(new Buffer('qwer'), 0,
-            new Buffer(0), new Buffer('1'), 0);
+        const k = new kinetic.PutPDU( 0, 0, new Buffer('qwer'),
+            new Buffer(0), new Buffer('1'));
         k.setChunk(new Buffer("ON DIT BONJOUR TOUT LE MONDE"));
         const result = k.read();
 
@@ -410,7 +410,7 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid PUT_RESPONSE', (done) => {
-        const result = new kinetic.PutResponsePDU(1, new Buffer(0), 1).read();
+        const result = new kinetic.PutResponsePDU(1, 1, new Buffer(0)).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x2e\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -424,7 +424,7 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid GET', (done) => {
-        const result = new kinetic.GetPDU(new Buffer('qwer'), 0, 0).read();
+        const result = new kinetic.GetPDU(0, 0, new Buffer('qwer')).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x37\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -442,8 +442,8 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid GET_RESPONSE', (done) => {
-        let result = new kinetic.GetResponsePDU(new Buffer('qwer'), 1,
-            new Buffer(0), new Buffer('1'), 1);
+        let result = new kinetic.GetResponsePDU(1, 1, new Buffer(0),
+            new Buffer('qwer'), new Buffer('1'));
 
         result.setChunk(new Buffer("HI EVERYBODY"));
 
@@ -462,7 +462,7 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid DELETE', (done) => {
-        const result = new kinetic.DeletePDU(new Buffer('qwer'), 0, 0,
+        const result = new kinetic.DeletePDU(0, 0, new Buffer('qwer'),
             new Buffer('1234')).read();
 
         const expected = new Buffer(
@@ -481,7 +481,7 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid DELETE_RESPONSE', (done) => {
-        const result = new kinetic.DeleteResponsePDU(1, new Buffer(0), 1)
+        const result = new kinetic.DeleteResponsePDU(1, 1, new Buffer(0))
             .read();
 
         const expected = new Buffer(
@@ -514,7 +514,7 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid FLUSH_RESPONSE', (done) => {
-        const result = new kinetic.FlushResponsePDU(1, new Buffer(0), 1).read();
+        const result = new kinetic.FlushResponsePDU(1, 1, new Buffer(0)).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x2a\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -529,7 +529,7 @@ describe('kinetic.PDU _read()', () => {
 
 
     it('should write valid GETLOG', (done) => {
-        const result = new kinetic.GetLogPDU(0, [0, 1, 2, 4, 5, 6], 0).read();
+        const result = new kinetic.GetLogPDU(0, 0, [0, 1, 2, 4, 5, 6]).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x3d\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -557,8 +557,8 @@ describe('kinetic.PDU _read()', () => {
             temperatures:
                 [ { name: 'HDA', current: 51, minimum: 5, maximum: 100,
                     target: 25 },
-                    { name: 'CPU', current: 40, minimum: 5, maximum: 100,
-                        target: 25 } ],
+                  { name: 'CPU', current: 40, minimum: 5, maximum: 100,
+                    target: 25 } ],
             capacity:
             { nominalCapacityInBytes: -1114419200,
             portionFull: 0.05364461988210678 },
@@ -614,8 +614,8 @@ describe('kinetic.PDU _read()', () => {
                 maxBatchCountPerDevice: 5 },
             device: null
         };
-        const result = new kinetic.GetLogResponsePDU(1, new Buffer(0),
-            logResponse,  1).read();
+        const result = new kinetic.GetLogResponsePDU(1,  1, new Buffer(0),
+            logResponse).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x01\x4d\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -664,7 +664,7 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid SETUP_RESPONSE', (done) => {
-        const result = new kinetic.SetupResponsePDU(1, new Buffer(0), 1).read();
+        const result = new kinetic.SetupResponsePDU(1, 1, new Buffer(0)).read();
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x2a\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -681,8 +681,8 @@ describe('kinetic.PDU _read()', () => {
 describe('kinetic.PutPDU()', () => {
     it('should check key type', (done) => {
         try {
-            const k = new kinetic.PutPDU("string", 1, new Buffer('2'),
-                new Buffer('3'), 1);
+            const k = new kinetic.PutPDU(1, 1, "string", new Buffer('2'),
+                new Buffer('3'));
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
@@ -693,8 +693,8 @@ describe('kinetic.PutPDU()', () => {
     });
     it('should check the old dbVersion type', (done) => {
         try {
-            const k = new kinetic.PutPDU(new Buffer("string"), 1, '2',
-                new Buffer('3'), 1);
+            const k = new kinetic.PutPDU(1, 1, new Buffer("string"), '2',
+                new Buffer('3'));
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
@@ -705,8 +705,8 @@ describe('kinetic.PutPDU()', () => {
     });
     it('should check the new dbVersion type', (done) => {
         try {
-            const k = new kinetic.PutPDU(new Buffer("string"), 1,
-                new Buffer('2'), '3', 1);
+            const k = new kinetic.PutPDU( 1, 1, new Buffer("string"),
+                new Buffer('2'), '3');
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
@@ -720,7 +720,7 @@ describe('kinetic.PutPDU()', () => {
 describe('kinetic.GetPDU()', () => {
     it('should check key type', (done) => {
         try {
-            const k = new kinetic.GetPDU("string", 1, 2);
+            const k = new kinetic.GetPDU( 1, 2, "string");
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
@@ -734,7 +734,7 @@ describe('kinetic.GetPDU()', () => {
 describe('kinetic.DeletePDU()', () => {
     it('should check key type', (done) => {
         try {
-            const k = new kinetic.DeletePDU("string", 1, 2, new Buffer('3'));
+            const k = new kinetic.DeletePDU( 1, 2, "string", new Buffer('3'));
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
@@ -745,7 +745,7 @@ describe('kinetic.DeletePDU()', () => {
     });
     it('should check the dbVersion type', (done) => {
         try {
-            const k = new kinetic.DeletePDU(new Buffer("string"), 1, 2, '3');
+            const k = new kinetic.DeletePDU( 1, 2, new Buffer("string"), '3');
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
