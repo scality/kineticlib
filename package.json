@@ -31,8 +31,7 @@
     },
     "scripts": {
         "lint": "eslint $(git ls-files '*.js')",
-        "tests_unit": "mocha -r babel/register tests/unit",
-        "tests_functional": "make -C tests/functional"
+        "test": "mocha -r babel/register tests/unit"
     },
     "private": true
 }
