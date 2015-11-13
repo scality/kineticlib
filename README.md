@@ -20,10 +20,10 @@ import net from 'net';
 import kinetic from 'kineticlib';
 
 const pdu = new kinetic.PutPDU(
+    1,                                   // sequence number
+    1989,                                // clusterVersion
     new Buffer("mykey"),                 // key
-    1,                                   // incrementTCP
-    new Buffer('44'), new Buffer('45'),  // dbVersion, newVersion
-    1989                                 // clusterVersion
+    new Buffer('44'), new Buffer('45')   // dbVersion, newVersion
 );
 pdu.setChunk(new Buffer("D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4"));
 
