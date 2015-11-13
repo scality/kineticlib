@@ -1,4 +1,5 @@
 import assert from 'assert';
+import stream from 'stream';
 import util from 'util';
 
 import winston from 'winston';
@@ -9,7 +10,17 @@ const logger = new (winston.Logger)({
     transports: [new (winston.transports.Console)({ level: 'error' })]
 });
 
-describe('kinetic.PDU constructor()', () => {
+describe('kinetic.PDU decoding()', () => {
+    function checkDecoding(data, checkFunction, done) {
+        try {
+            const pdu = new kinetic.PDU(data);
+            checkFunction(pdu);
+            done();
+        } catch (err) {
+            done(err);
+        }
+    }
+
     it('should parse valid NOOP', (done) => {
         /*
          * Note: expected buffers formatted using:
@@ -21,19 +32,13 @@ describe('kinetic.PDU constructor()', () => {
             "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
             "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12\x00", "ascii");
 
-        try {
-            const pdu = new kinetic.PDU(rawData);
-
+        checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 20);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP);
             assert.deepEqual(pdu.getClusterVersion(), 9876798);
             assert.deepEqual(pdu.getSequence(), 123);
-
-            done();
-        } catch (e) {
-            done(e);
-        }
+        }, done);
     });
 
     it('should parse valid NOOP_RESPONSE', (done) => {
@@ -43,17 +48,12 @@ describe('kinetic.PDU constructor()', () => {
             "\x11\xaf\x14\x74\x83\x3a\x11\x0a\x0b\x18\xa9\xc4\xd2\x92\x8d\x2a" +
             "\x30\x02\x38\x1d\x1a\x02\x08\x01", "ascii");
 
-        try {
-            const pdu = new kinetic.PDU(rawData);
+        checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 17);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 2);
-
-            done();
-        } catch (e) {
-            done(e);
-        }
+        }, done);
     });
 
     it('should parse valid PUT', (done) => {
@@ -65,21 +65,14 @@ describe('kinetic.PDU constructor()', () => {
             "mykey\x22\x01\xe3\x48\x01D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4",
             "ascii");
 
-        try {
-            const pdu = new kinetic.PDU(rawData);
+        checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 35);
             assert.deepEqual(pdu.getChunkSize(), 40);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.PUT);
             assert.deepEqual(pdu.getClusterVersion(), 1989);
             assert.deepEqual(pdu.getSequence(), 1);
             assert.deepEqual(pdu.getKey(), new Buffer("mykey"));
-            assert(pdu.getChunk().equals(
-                new Buffer("D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4")));
-
-            done();
-        } catch (e) {
-            done(e);
-        }
+        }, done);
     });
 
     it('should parse valid PUT_RESPONSE', (done) => {
@@ -89,18 +82,12 @@ describe('kinetic.PDU constructor()', () => {
             "\xa5\xe6\x4f\x0a\xe2\x3a\x15\x0a\x0b\x18\x8d\xc4\xd2\x92\x8d\x2a" +
             "\x30\x00\x38\x03\x12\x02\x0a\x00\x1a\x02\x08\x01", "ascii");
 
-        try {
-            const pdu = new kinetic.PDU(rawData);
-
+        checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 21);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.PUT_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 0);
-
-            done();
-        } catch (e) {
-            done(e);
-        }
+        }, done);
     });
 
     it('should parse valid GET', (done) => {
@@ -111,19 +98,14 @@ describe('kinetic.PDU constructor()', () => {
             "\x8d\x2a\x20\x01\x38\x02\x12\x08\x0a\x06\x1a\x04\x71\x77\x65\x72",
             "ascii");
 
-        try {
-            const pdu = new kinetic.PDU(rawData);
-
+        checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 25);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GET);
             assert.deepEqual(pdu.getClusterVersion(), 0);
+            assert.deepEqual(pdu.getSequence(), 1);
             assert.deepEqual(pdu.getKey(), new Buffer("qwer"));
-
-            done();
-        } catch (e) {
-            done(e);
-        }
+        }, done);
     });
 
     it('should parse valid GET_RESPONSE', (done) => {
@@ -134,21 +116,13 @@ describe('kinetic.PDU constructor()', () => {
             "\x30\x01\x38\x01\x12\x0c\x0a\x0a\x1a\x04qwer\x22\x00" +
             "\x2a\x00\x1a\x02\x08\x01ON DIT BONJOUR TOUT LE MONDE", "ascii");
 
-        try {
-            const pdu = new kinetic.PDU(rawData);
-
+        checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 31);
             assert.deepEqual(pdu.getChunkSize(), 28);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GET_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 1);
             assert.deepEqual(pdu.getKey(), new Buffer("qwer"));
-            assert(pdu.getChunk().equals(
-                new Buffer("ON DIT BONJOUR TOUT LE MONDE")));
-
-            done();
-        } catch (e) {
-            done(e);
-        }
+        }, done);
     });
 
     it('should parse valid FLUSH', (done) => {
@@ -158,19 +132,13 @@ describe('kinetic.PDU constructor()', () => {
             "\xe1\x1f\x6b\x73\x8e\x3a\x11\x0a\x0d\x08\x00\x18\xe3\xec\xde\x95" +
             "\x8d\x2a\x20\x03\x38\x20\x12\x00", "ascii");
 
-        try {
-            const pdu = new kinetic.PDU(rawData);
-
+        checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 17);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.FLUSH);
             assert.deepEqual(pdu.getClusterVersion(), 0);
             assert.deepEqual(pdu.getSequence(), 3);
-
-            done();
-        } catch (e) {
-            done(e);
-        }
+        }, done);
     });
 
 
@@ -181,18 +149,12 @@ describe('kinetic.PDU constructor()', () => {
             "\xe0\x10\x74\xf8\x1a\x3a\x11\x0a\x0b\x18\xad\xc4\xd2\x92\x8d\x2a" +
             "\x30\x03\x38\x1f\x1a\x02\x08\x01", "ascii");
 
-        try {
-            const pdu = new kinetic.PDU(rawData);
-
+        checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 17);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.FLUSH_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 3);
-
-            done();
-        } catch (e) {
-            done(e);
-        }
+        }, done);
     });
 
     it('should parse valid GETLOG', (done) => {
@@ -203,19 +165,13 @@ describe('kinetic.PDU constructor()', () => {
             "\x8d\x2a\x20\x04\x38\x18\x12\x10\x32\x0e\x08\x00\x08\x01\x08\x02" +
             "\x08\x03\x08\x04\x08\x05\x08\x06", "ascii");
 
-        try {
-            const pdu = new kinetic.PDU(rawData);
-
+        checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 33);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GETLOG);
             assert.deepEqual(pdu.getClusterVersion(), 0);
             assert.deepEqual(pdu.getSequence(), 4);
-
-            done();
-        } catch (e) {
-            done(e);
-        }
+        }, done);
     });
 
         /*
@@ -251,19 +207,14 @@ describe('kinetic.PDU constructor()', () => {
             "\x0f\x40\xff\xff\xff\xff\x0f\x48\xc8\x01\x50\xff\xff\xff\xff\x0f" +
             "\x60\x0f\x68\x05\x1a\x02\x08\x01",  "ascii");
 
-        try {
-            const pdu = new kinetic.PDU(rawData);
-
+        checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 352);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GETLOG_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 4);
             assert.deepEqual(pdu._message.body.getLog.types,
                 [0, 1, 2, 4, 5, 6]);
-            done();
-        } catch (e) {
-            done(e);
-        }
+        }, done);
     });
 
     it('should detect PDU with invalid version', (done) => {
@@ -322,27 +273,6 @@ describe('kinetic.PDU constructor()', () => {
         }
     });
 
-    it('should detect PDU with truncated chunk', (done) => {
-        const rawData = new Buffer(
-            "\x46\x00\x00\x00\x41\x00\x00\x00\x28\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\x3b\xad\xea\x16\x6f\x8b\x37\xff\xf6\xd6\x0d\x03\x24\xf1\xb5" +
-            "\x53\xa9\x14\xbb\xc6\x3a\x23\x0a\x0e\x08\xc5\x0f\x18\xf8\x87\xcd" +
-            "\xf4\x8c\x2a\x20\x01\x38\x04\x12\x11\x0a\x0f\x12\x01\xe3\x1a\x05" +
-            "mykey\x22\x01\xe3\x48\x01D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t",
-            "ascii");
-
-        try {
-            const pdu = new kinetic.PDU(rawData);
-            pdu;
-            done(new Error("No error thrown"));
-        } catch (e) {
-            if (e.badLength)
-                done();
-            else
-                done(e);
-        }
-    });
-
     it('should detect PDU with bad HMAC', (done) => {
         const rawData = new Buffer(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -365,7 +295,103 @@ describe('kinetic.PDU constructor()', () => {
     });
 });
 
-describe('kinetic.PDU _read()', () => {
+describe('kinetic.streamToPDU()', () => {
+    it('should parse one-block stream', (done) => {
+        const sock = new stream.PassThrough();
+
+        kinetic.streamToPDU(sock, (err, pdu) => {
+            if (err)
+                return done(err);
+
+            assert.deepEqual(pdu.getProtobufSize(), 20);
+            assert.deepEqual(pdu.getChunkSize(), 0);
+            assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP);
+            assert.deepEqual(pdu.getClusterVersion(), 9876798);
+            assert.deepEqual(pdu.getSequence(), 123);
+            done();
+        });
+
+        sock.write(new Buffer(
+            "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa\x53\xb4\x15" +
+            "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
+            "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12\x00", "ascii"));
+    });
+
+    it('should parse multi-part stream', (done) => {
+        const sock = new stream.PassThrough();
+
+        kinetic.streamToPDU(sock, (err, pdu) => {
+            if (err)
+                return done(err);
+
+            assert.deepEqual(pdu.getProtobufSize(), 20);
+            assert.deepEqual(pdu.getChunkSize(), 0);
+            assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP);
+            assert.deepEqual(pdu.getClusterVersion(), 9876798);
+            assert.deepEqual(pdu.getSequence(), 123);
+            done();
+        });
+
+        sock.write(new Buffer(
+            "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa", "ascii"));
+        setTimeout(() => {
+            sock.write(new Buffer(
+                "\x53\xb4\x15\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea" +
+                "\xda\x04\x18\xcd\xa0\x85\xc4\x8c\x2a\x20\x7b\x38", "ascii"));
+        }, 10);
+        setTimeout(() => {
+            sock.write(new Buffer("\x1e\x12\x00", "ascii"));
+        }, 40);
+    });
+
+    it('should detect truncated stream', (done) => {
+        const sock = new stream.PassThrough();
+
+        kinetic.streamToPDU(sock, (err) => {
+            if (err) {
+                if (err.badLength)
+                    done();
+                else
+                    done(err);
+            } else {
+                done(new Error("No error thrown"));
+            }
+        });
+
+        sock.write(new Buffer(
+            "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa", "ascii"));
+        sock.end();
+    });
+
+    it('should not read extra bytes', (done) => {
+        const sock = new stream.PassThrough();
+
+        kinetic.streamToPDU(sock, (err) => {
+            if (err) {
+                done(err);
+            } else {
+                const chunk = sock.read();
+                if (chunk === null || chunk.length !== 28)
+                    done(new Error(
+                            "chunk has already been read from the socket"));
+                else
+                    done();
+            }
+        });
+
+        sock.write(new Buffer(
+            "\x46\x00\x00\x00\x3e\x00\x00\x00\x1c\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x7d\x41\xc3\xd7\x37\xb9\x69\x82\xef\xb5\x2d\x7b\xc3\x9f\x47" +
+            "\x35\x82\x92\x29\x6d\x3a\x20\x0a\x0d\x08\x00\x18\xdb\x9e\xcc\xc0" +
+            "\x8d\x2a\x20\x00\x38\x04\x12\x0f\x0a\x0d\x12\x01\x31\x1a\x04qwer" +
+            "\x22\x00\x48\x01ON DIT BONJOUR TOUT LE MONDE", "ascii"));
+    });
+});
+
+describe('kinetic.PDU encoding()', () => {
     it('should write valid NOOP', (done) => {
         const result = new kinetic.NoOpPDU(123, 9876798).read();
 
@@ -398,10 +424,11 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid PUT', (done) => {
-        const k = new kinetic.PutPDU( 0, 0, new Buffer('qwer'),
+        const chunk = new Buffer("ON DIT BONJOUR TOUT LE MONDE");
+        const k = new kinetic.PutPDU(0, 0, new Buffer('qwer'), chunk.length,
             new Buffer(0), new Buffer('1'));
-        k.setChunk(new Buffer("ON DIT BONJOUR TOUT LE MONDE"));
-        const result = k.read();
+
+        const result = Buffer.concat([k.read(), chunk]);
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x3e\x00\x00\x00\x1c\x20\x01\x2a\x18\x08\x01\x12" +
@@ -451,12 +478,12 @@ describe('kinetic.PDU _read()', () => {
     });
 
     it('should write valid GET_RESPONSE', (done) => {
-        let result = new kinetic.GetResponsePDU(1, 1, new Buffer(0),
-            new Buffer('qwer'), new Buffer('1'));
+        const chunk = new Buffer("HI EVERYBODY");
+        const pdu = new kinetic.GetResponsePDU(
+                1, 1, new Buffer(0), new Buffer('qwer'), chunk.length,
+                new Buffer('1'));
 
-        result.setChunk(new Buffer("HI EVERYBODY"));
-
-        result = result.read();
+        const result = Buffer.concat([pdu.read(), chunk]);
 
         const expected = new Buffer(
             "\x46\x00\x00\x00\x37\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
@@ -690,8 +717,8 @@ describe('kinetic.PDU _read()', () => {
 describe('kinetic.PutPDU()', () => {
     it('should check key type', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, 1, "string", new Buffer('2'),
-                new Buffer('3'));
+            const k = new kinetic.PutPDU(
+                1, 1, "string", 12, new Buffer('2'), new Buffer('3'));
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
@@ -702,8 +729,8 @@ describe('kinetic.PutPDU()', () => {
     });
     it('should check the old dbVersion type', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, 1, new Buffer("string"), '2',
-                new Buffer('3'));
+            const k = new kinetic.PutPDU(
+                1, 1, new Buffer("string"), 12, '2', new Buffer('3'));
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
@@ -714,8 +741,8 @@ describe('kinetic.PutPDU()', () => {
     });
     it('should check the new dbVersion type', (done) => {
         try {
-            const k = new kinetic.PutPDU( 1, 1, new Buffer("string"),
-                new Buffer('2'), '3');
+            const k = new kinetic.PutPDU(
+                1, 1, new Buffer("string"), 12, new Buffer('2'), '3');
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
