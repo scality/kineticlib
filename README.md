@@ -22,7 +22,7 @@ const chunk = new Buffer("D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4");
 const pdu = new kinetic.PutPDU(
     1,                                   // sequence number
     1989,                                // clusterVersion
-    new Buffer("mykey"),                 // key
+    "mykey",                             // key
     chunk.length,                        // chunkSize
     new Buffer('44'), new Buffer('45')   // dbVersion, newVersion
 );
