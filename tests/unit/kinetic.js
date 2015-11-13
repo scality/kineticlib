@@ -715,79 +715,119 @@ describe('kinetic.PDU encoding()', () => {
 });
 
 describe('kinetic.PutPDU()', () => {
-    it('should check key type', (done) => {
+    it('should accept string key', (done) => {
         try {
             const k = new kinetic.PutPDU(
                 1, 1, "string", 12, new Buffer('2'), new Buffer('3'));
             k;
-            done(new Error("constructor accepted string-typed key"));
-        } catch (e) {
-            if (e.message !== "key is not a buffer")
-                done(e);
             done();
+        } catch (e) {
+            done(e);
         }
     });
-    it('should check the old dbVersion type', (done) => {
+
+    it('should not accept non-string non-buffer key', (done) => {
         try {
             const k = new kinetic.PutPDU(
-                1, 1, new Buffer("string"), 12, '2', new Buffer('3'));
+                1, 1, 77777, 12, new Buffer('2'), new Buffer('3'));
+            k;
+            done(new Error("constructor accepted invalid key type"));
+        } catch (e) {
+            if (e.badArg)
+                done();
+            else
+                done(e);
+        }
+    });
+
+    it('should not accept non-buffer dbVersion', (done) => {
+        try {
+            const k = new kinetic.PutPDU(
+                1, 1, "string", 12, '2', new Buffer('3'));
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
-            if (e.message !== "old dbversion is not a buffer")
+            if (e.badArg)
+                done();
+            else
                 done(e);
-            done();
         }
     });
-    it('should check the new dbVersion type', (done) => {
+
+    it('should not accept non-buffer newVersion', (done) => {
         try {
             const k = new kinetic.PutPDU(
-                1, 1, new Buffer("string"), 12, new Buffer('2'), '3');
+                1, 1, "string", 12, new Buffer('2'), '3');
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
-            if (e.message !== "new dbversion is not a buffer")
+            if (e.badArg)
+                done();
+            else
                 done(e);
-            done();
         }
     });
 });
 
 describe('kinetic.GetPDU()', () => {
-    it('should check key type', (done) => {
+    it('should accept string key', (done) => {
         try {
-            const k = new kinetic.GetPDU( 1, 2, "string");
+            const k = new kinetic.GetPDU(1, 2, "string");
+            k;
+            done();
+        } catch (e) {
+            done(e);
+        }
+    });
+
+    it('should not accept non-string non-buffer key', (done) => {
+        try {
+            const k = new kinetic.GetPDU(1, 2, 7777777);
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
-            if (e.message !== "key is not a buffer")
+            if (e.badArg)
+                done();
+            else
                 done(e);
-            done();
         }
     });
 });
 
 describe('kinetic.DeletePDU()', () => {
-    it('should check key type', (done) => {
+    it('should accept string key', (done) => {
         try {
-            const k = new kinetic.DeletePDU( 1, 2, "string", new Buffer('3'));
+            const k = new kinetic.DeletePDU(1, 2, "string", new Buffer('3'));
             k;
-            done(new Error("constructor accepted string-typed key"));
-        } catch (e) {
-            if (e.message !== "key is not a buffer")
-                done(e);
             done();
+        } catch (e) {
+            done(e);
         }
     });
-    it('should check the dbVersion type', (done) => {
+
+    it('should not accept non-string non-buffer key', (done) => {
         try {
-            const k = new kinetic.DeletePDU( 1, 2, new Buffer("string"), '3');
+            const k = new kinetic.DeletePDU(1, 2, 777777, new Buffer('3'));
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
-            if (e.message !== "dbVersion is not a buffer")
+            if (e.badArg)
+                done();
+            else
                 done(e);
-            done();
+        }
+    });
+
+    it('should not accept non-buffer dbVersion', (done) => {
+        try {
+            const k = new kinetic.DeletePDU(1, 2, "string", '3');
+            k;
+            done(new Error("constructor accepted string-typed key"));
+        } catch (e) {
+            if (e.badArg)
+                done();
+            else
+                done(e);
         }
     });
 });
