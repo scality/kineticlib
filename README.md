@@ -16,23 +16,24 @@ Create a PDU for a PUT at key "mykey" and send it to localhost on port 1234:
 
 ```js
 import net from 'net';
-
 import kinetic from 'kineticlib';
 
+const chunk = new Buffer("D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4");
 const pdu = new kinetic.PutPDU(
     1,                                   // sequence number
     1989,                                // clusterVersion
     new Buffer("mykey"),                 // key
+    chunk.length,                        // chunkSize
     new Buffer('44'), new Buffer('45')   // dbVersion, newVersion
 );
-pdu.setChunk(new Buffer("D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4"));
 
 const sock = net.connect(1234, 'localhost');
 sock.on("end", () => {
     process.stdout.write("PDU sent through the network.\n");
 });
 
-pdu.pipe(sock, { end: false });
+sock.write(pdu.read());
+sock.write(chunk);
 ```
 
 Decode a PDU message from a buffer:
@@ -45,7 +46,7 @@ const pdu = new kinetic.PDU(rawData);
 const type = pdu.getMessageType();
 process.stdout.write("Received " + kinetic.getOpName(type) + " PDU.\n");
 
-if (type === kinetic.ops.GET) {
+if (type === kinetic.ops.GET)
     process.stdout.write("Peer is trying to GET key " + pdu.getKey() + ".\n");
 ```
 
@@ -53,10 +54,14 @@ Asynchronously decode a PDU from a stream (e.g. a socket):
 
 ```js
 kinetic.streamToPDU(socket, (err, pdu) => {
-    if (err)
-        process.stdout.write("... something bad happened\n");
-    else
-        process.stdout.write("... bytes transformed into a PDU!\n");
+    if (err) {
+        handleErr(err);
+    } else {
+        if (pdu.getMessageType() === kinetic.ops.GET_RESPONSE) {
+            const chunk = socket.read();
+            // ...
+        }
+    }
 });
 
 process.stdout.write("receiving bytes...\n");
