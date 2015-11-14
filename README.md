@@ -19,12 +19,22 @@ import net from 'net';
 import kinetic from 'kineticlib';
 
 const chunk = new Buffer("D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4D4T4d4t4");
+const options = {
+    dbVersion: new Buffer('44'),        // The actual version of the value in
+                                        // the database
+    newVersion: new Buffer('45'),       // The updated version of the value in
+                                        // the database
+    force: false                        // Setting force to true ignores
+                                        // potential version mismatches and
+                                        // carries out the operation.
+    clusterVersion                      // the cluster version
+}
+
 const pdu = new kinetic.PutPDU(
     1,                                   // sequence number
-    1989,                                // clusterVersion
     "mykey",                             // key
     chunk.length,                        // chunkSize
-    new Buffer('44'), new Buffer('45')   // dbVersion, newVersion
+    options,                             // options
 );
 
 const sock = net.connect(1234, 'localhost');
