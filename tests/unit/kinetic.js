@@ -50,6 +50,7 @@ describe('kinetic.PDU decoding()', () => {
 
         checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 17);
+            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 2);
@@ -84,6 +85,7 @@ describe('kinetic.PDU decoding()', () => {
 
         checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 21);
+            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.PUT_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 0);
@@ -118,6 +120,7 @@ describe('kinetic.PDU decoding()', () => {
 
         checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 31);
+            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
             assert.deepEqual(pdu.getChunkSize(), 28);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GET_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 1);
@@ -151,6 +154,7 @@ describe('kinetic.PDU decoding()', () => {
 
         checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 17);
+            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.FLUSH_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 3);
@@ -209,6 +213,7 @@ describe('kinetic.PDU decoding()', () => {
 
         checkDecoding(rawData, (pdu) => {
             assert.deepEqual(pdu.getProtobufSize(), 352);
+            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GETLOG_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 4);
