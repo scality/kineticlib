@@ -464,7 +464,7 @@ describe('kinetic.PDU encoding()', () => {
         done();
     });
 
-    it('should write valid GET', (done) => {
+    it('should write valid GET(options missing)', (done) => {
         const result = new kinetic.GetPDU(0, 0, new Buffer('qwer')).read();
 
         const expected = new Buffer(
@@ -473,6 +473,44 @@ describe('kinetic.PDU encoding()', () => {
             "\xd4\x5a\xb6\x17\xfd\x3a\x19\x0a\x0d\x08\x00\x18\x95\xd3\xeb\xc2" +
             "\x8d\x2a\x20\x00\x38\x02\x12\x08\x0a\x06\x1a\x04\x71\x77\x65\x72",
             "ascii");
+
+        // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
+        assert(result.slice(0, 17).equals(expected.slice(0, 17)));
+        assert(result.slice(37, 44).equals(expected.slice(37, 44)));
+        assert(result.slice(49).equals(expected.slice(49)));
+
+        done();
+    });
+
+    it('should write valid GET (metadataOnly: false)', (done) => {
+        const result = new kinetic.GetPDU(0, 0, new Buffer('qwer'), false)
+            .read();
+
+        const expected = new Buffer(
+            "\x46\x00\x00\x00\x39\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x87\x3a\xda\x04\xe1\x0b\x7d\x5e\x34\xd0\xc4\x3a\x89\x16\x0f" +
+            "\x2c\xdf\xf0\x05\x52\x3a\x1b\x0a\x0d\x08\x00\x18\xfc\xc6\x98\x95" +
+            "\x91\x2a\x20\x00\x38\x02\x12\x0a\x0a\x08\x1a\x04\x71\x77\x65\x72" +
+            "\x38\x00", "ascii");
+
+        // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
+        assert(result.slice(0, 17).equals(expected.slice(0, 17)));
+        assert(result.slice(37, 44).equals(expected.slice(37, 44)));
+        assert(result.slice(49).equals(expected.slice(49)));
+
+        done();
+    });
+
+    it('should write valid GET (metadataOnly : true)', (done) => {
+        const result = new kinetic.GetPDU(0, 0, new Buffer('qwer'), true)
+            .read();
+
+        const expected = new Buffer(
+            "\x46\x00\x00\x00\x39\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x22\xcd\x40\xbb\x1d\xc8\xa6\x34\xb3\x75\x27\xaa\x43\x5f\x1c" +
+            "\xd3\xbc\x88\xb3\x0c\x3a\x1b\x0a\x0d\x08\x00\x18\x8f\xf0\x9f\x95" +
+            "\x91\x2a\x20\x00\x38\x02\x12\x0a\x0a\x08\x1a\x04\x71\x77\x65\x72" +
+            "\x38\x01", "ascii");
 
         // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
