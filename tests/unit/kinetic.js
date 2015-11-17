@@ -38,6 +38,10 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP);
             assert.deepEqual(pdu.getClusterVersion(), 9876798);
             assert.deepEqual(pdu.getSequence(), 123);
+            assert.deepEqual(pdu.getKey(), undefined);
+            assert.deepEqual(pdu.getDbVersion(), undefined);
+            assert.deepEqual(pdu.getNewVersion(), undefined);
+            assert.deepEqual(pdu.getForce(), false);
         }, done);
     });
 
@@ -73,6 +77,9 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepEqual(pdu.getClusterVersion(), 1989);
             assert.deepEqual(pdu.getSequence(), 1);
             assert.deepEqual(pdu.getKey(), new Buffer("mykey"));
+            assert.deepEqual(pdu.getDbVersion(), new Buffer('ã', 'ascii'));
+            assert.deepEqual(pdu.getNewVersion(), new Buffer('ã', 'ascii'));
+            assert.deepEqual(pdu.getForce(), false);
         }, done);
     });
 
@@ -89,6 +96,7 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.PUT_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 0);
+            assert.deepEqual(pdu.getDbVersion(), undefined);
         }, done);
     });
 
@@ -107,6 +115,9 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepEqual(pdu.getClusterVersion(), 0);
             assert.deepEqual(pdu.getSequence(), 1);
             assert.deepEqual(pdu.getKey(), new Buffer("qwer"));
+            assert.deepEqual(pdu.getDbVersion(), undefined);
+            assert.deepEqual(pdu.getNewVersion(), undefined);
+            assert.deepEqual(pdu.getForce(), false);
         }, done);
     });
 
@@ -125,6 +136,9 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GET_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 1);
             assert.deepEqual(pdu.getKey(), new Buffer("qwer"));
+            assert.deepEqual(pdu.getDbVersion(), new Buffer(''));
+            assert.deepEqual(pdu.getNewVersion(), undefined);
+            assert.deepEqual(pdu.getForce(), false);
         }, done);
     });
 
