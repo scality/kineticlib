@@ -14,8 +14,7 @@ Sure. You can run some tests locally:
 
 ```
 npm run --silent lint
-npm run --silent tests_unit
-npm run --silent tests_functional
+npm run --silent test
 ```
 
 Integration and performance tests really need a CI infrastructure to simulate
@@ -41,10 +40,10 @@ import kinetic from '../index.js';
 
 let rawData = undefined;
 
-const k = new kinetic.NoOpPDU(123, 9876798);
+const k = new kinetic.NoOpPDU(123);
 
 
-// if you want a put, you need a chunk : 
+// if you want a put or a get response, you need a chunk : 
 // k.setChunk(new Buffer("HI EVERYBODY"));
 
 
@@ -123,48 +122,3 @@ requestsArr.forEach(writeHex);
      - GET
      - DELETE
    
-## Functional tests
-
-Functional tests are located in the `tests/functional` directory.
-
-### Architecture
-
-* Kinetic Device simulator `tests/dependencies`
-  - TCP connection
-  - JAVA simulator
-  - maven is needed for the build
-    - Download : https://maven.apache.org/download.cgi
-    - Installation guide : https://maven.apache.org/install.html
-* mocha
-
-### Method
-
-Test are run by:
-* lauching the Makefile located in the tests/functional directory :
-  - make submodule_sync
-    - sync and load the dependencies (simulator package) 
-  - make build_cache
-    - build the simulator package with cache rule for avoiding many downloads 
-      and builds
-  - make start_simulator
-    - start the simulator
-  - make stop_simulator
-    - stop the simulator
-  - make run_test
-    - run the tests with mocha (`tests/functional/simulTest.js`)
-  - can use make for an automatic load
-
-### Functions tested
-
-* Kinetic
-  - Build (kinetic compatibility)
-    - Protobuf message
-    - Buffer sent format
-  - Parse
-    - Decode the received buffer
-    - Check Version
-    - HmacIntegrity 
-      (compute an HMAC from the PDU and compare it to the one sent)
-  - Send()
-    - Check the simulator returns (SUCCESS)
-    - The simulator check the HMAC(integrity of PDU sent)
