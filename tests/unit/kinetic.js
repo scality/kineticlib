@@ -142,6 +142,40 @@ describe('kinetic.PDU decoding()', () => {
         }, done);
     });
 
+    it('should parse valid DELETE', (done) => {
+        const rawData = new Buffer(
+            "\x46\x00\x00\x00\x41\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\xf7\x12\xbb\xff\x62\x2b\x2b\xa3\x1a\xab\x42\xdd\x3d\x61\x83" +
+            "\x92\xa6\xe0\x07\x34\x3a\x23\x0a\x0d\x08\x00\x18\x83\xd1\x9b\xb8" +
+            "\x91\x2a\x20\x00\x38\x06\x12\x12\x0a\x10\x1a\x06\x73\x74\x72\x69" +
+            "\x6e\x67\x22\x04\x31\x32\x33\x34\x48\x01", "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepEqual(pdu.getProtobufSize(), 35);
+            assert.deepEqual(pdu.getChunkSize(), 0);
+            assert.deepEqual(pdu.getMessageType(), kinetic.ops.DELETE);
+            assert.deepEqual(pdu.getClusterVersion(), 0);
+            assert.deepEqual(pdu.getSequence(), 0);
+            assert.deepEqual(pdu.getKey(), new Buffer("string"));
+        }, done);
+    });
+
+    it('should parse valid DELETE_RESPONSE', (done) => {
+        const rawData = new Buffer(
+            "\x46\x00\x00\x00\x35\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x1b\x4b\xa0\xe1\x25\xdb\xd0\x90\xbd\x1b\x96\xcd\xf6\x97\x14" +
+            "\x23\x12\xfe\xb8\x2c\x3a\x17\x0a\x04\x30\x00\x38\x05\x12\x02\x0a" +
+            "\x00\x1a\x0b\x08\x01\x1a\x07\x53\x55\x43\x43\x45\x53\x53",
+            "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepEqual(pdu.getProtobufSize(), 23);
+            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepEqual(pdu.getMessageType(), kinetic.ops.DELETE_RESPONSE);
+            assert.deepEqual(pdu.getSequence(), 0);
+        }, done);
+    });
+
     it('should parse valid FLUSH', (done) => {
         const rawData = new Buffer(
             "\x46\x00\x00\x00\x2f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -172,6 +206,40 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.FLUSH_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 3);
+        }, done);
+    });
+
+    it('should parse valid SetClusterVersion', (done) => {
+        const rawData = new Buffer(
+            "\x46\x00\x00\x00\x34\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\xde\xb2\xcf\xf8\x3b\x95\x83\x83\x72\xf0\xb3\xbb\xd6\xcd\xa0" +
+            "\x70\x21\x07\xe1\xf0\x3a\x16\x0a\x0d\x08\x00\x18\xed\x95\xcb\xb9" +
+            "\x91\x2a\x20\x00\x38\x16\x12\x05\x1a\x03\x08\xd2\x09", "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepEqual(pdu.getProtobufSize(), 22);
+            assert.deepEqual(pdu.getChunkSize(), 0);
+            assert.deepEqual(pdu.getMessageType(),
+                kinetic.ops.SET_CLUSTER_VERSION);
+            assert.deepEqual(pdu.getClusterVersion(), 0);
+            assert.deepEqual(pdu.getNewClusterVersion(), 1234);
+            assert.deepEqual(pdu.getSequence(), 0);
+        }, done);
+    });
+
+    it('should parse valid SETUP_RESPONSE', (done) => {
+        const rawData = new Buffer(
+            "\x46\x00\x00\x00\x31\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x6e\xe5\xc4\x5e\xa6\x02\x42\xa9\x55\x33\x68\xf0\x5e\x3b\xc9" +
+            "\xb9\x89\x96\x7d\xa7\x3a\x13\x0a\x04\x30\x00\x38\x15\x1a\x0b\x08" +
+            "\x01\x1a\x07\x53\x55\x43\x43\x45\x53\x53", "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepEqual(pdu.getProtobufSize(), 19);
+            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepEqual(pdu.getChunkSize(), 0);
+            assert.deepEqual(pdu.getMessageType(), kinetic.ops.SETUP_RESPONSE);
+            assert.deepEqual(pdu.getSequence(), 0);
         }, done);
     });
 
