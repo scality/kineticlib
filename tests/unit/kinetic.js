@@ -61,7 +61,7 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepEqual(pdu.getDbVersion(), undefined);
             assert.deepEqual(pdu.getNewVersion(), undefined);
             assert.deepEqual(pdu._message.status.code, kinetic.errors.SUCCESS);
-            assert.deepEqual(typeof pdu._message.body.getLog, 'object');
+            assert.deepEqual(typeof pdu.getLogObject(), 'object');
         }, done);
     });
 
@@ -339,8 +339,7 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepEqual(pdu.getChunkSize(), 0);
             assert.deepEqual(pdu.getMessageType(), kinetic.ops.GETLOG_RESPONSE);
             assert.deepEqual(pdu.getSequence(), 4);
-            assert.deepEqual(pdu._message.body.getLog.types,
-                [0, 1, 2, 4, 5, 6]);
+            assert.deepEqual(pdu.getLogObject().types, [0, 1, 2, 4, 5, 6]);
         }, done);
     });
 
