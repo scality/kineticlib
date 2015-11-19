@@ -52,16 +52,17 @@ describe('kinetic.PDU decoding()', () => {
             "\x02\x08\x01", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 341);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), null);
-            assert.deepEqual(pdu.getClusterVersion(), 0);
-            assert.deepEqual(pdu.getSequence(), undefined);
-            assert.deepEqual(pdu.getKey(), undefined);
-            assert.deepEqual(pdu.getDbVersion(), undefined);
-            assert.deepEqual(pdu.getNewVersion(), undefined);
-            assert.deepEqual(pdu._message.status.code, kinetic.errors.SUCCESS);
-            assert.deepEqual(typeof pdu.getLogObject(), 'object');
+            assert.deepStrictEqual(pdu.getProtobufSize(), 341);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(), null);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 0);
+            assert.deepStrictEqual(pdu.getSequence(), undefined);
+            assert.deepStrictEqual(pdu.getKey(), undefined);
+            assert.deepStrictEqual(pdu.getDbVersion(), undefined);
+            assert.deepStrictEqual(pdu.getNewVersion(), undefined);
+            assert.deepStrictEqual(pdu._message.status.code,
+                kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(typeof pdu.getLogObject(), 'object');
         }, done);
     });
 
@@ -73,15 +74,15 @@ describe('kinetic.PDU decoding()', () => {
             "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12\x00", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 20);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP);
-            assert.deepEqual(pdu.getClusterVersion(), 9876798);
-            assert.deepEqual(pdu.getSequence(), 123);
-            assert.deepEqual(pdu.getKey(), undefined);
-            assert.deepEqual(pdu.getDbVersion(), undefined);
-            assert.deepEqual(pdu.getNewVersion(), undefined);
-            assert.deepEqual(pdu.getForce(), false);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 20);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.NOOP);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 9876798);
+            assert.deepStrictEqual(pdu.getSequence(), 123);
+            assert.deepStrictEqual(pdu.getKey(), undefined);
+            assert.deepStrictEqual(pdu.getDbVersion(), undefined);
+            assert.deepStrictEqual(pdu.getNewVersion(), undefined);
+            assert.deepStrictEqual(pdu.getForce(), false);
         }, done);
     });
 
@@ -93,11 +94,12 @@ describe('kinetic.PDU decoding()', () => {
             "\x30\x02\x38\x1d\x1a\x02\x08\x01", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 17);
-            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP_RESPONSE);
-            assert.deepEqual(pdu.getSequence(), 2);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 17);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.NOOP_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 2);
         }, done);
     });
 
@@ -111,15 +113,17 @@ describe('kinetic.PDU decoding()', () => {
             "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 35);
-            assert.deepEqual(pdu.getChunkSize(), 40);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.PUT);
-            assert.deepEqual(pdu.getClusterVersion(), 1989);
-            assert.deepEqual(pdu.getSequence(), 1);
-            assert.deepEqual(pdu.getKey(), new Buffer("mykey"));
-            assert.deepEqual(pdu.getDbVersion(), new Buffer('ã', 'ascii'));
-            assert.deepEqual(pdu.getNewVersion(), new Buffer('ã', 'ascii'));
-            assert.deepEqual(pdu.getForce(), false);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 35);
+            assert.deepStrictEqual(pdu.getChunkSize(), 40);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.PUT);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 1989);
+            assert.deepStrictEqual(pdu.getSequence(), 1);
+            assert.deepStrictEqual(pdu.getKey(), new Buffer("mykey"));
+            assert.deepStrictEqual(pdu.getDbVersion(),
+                new Buffer('ã', 'ascii'));
+            assert.deepStrictEqual(pdu.getNewVersion(),
+                new Buffer('ã', 'ascii'));
+            assert.deepStrictEqual(pdu.getForce(), false);
         }, done);
     });
 
@@ -131,12 +135,13 @@ describe('kinetic.PDU decoding()', () => {
             "\x30\x00\x38\x03\x12\x02\x0a\x00\x1a\x02\x08\x01", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 21);
-            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.PUT_RESPONSE);
-            assert.deepEqual(pdu.getSequence(), 0);
-            assert.deepEqual(pdu.getDbVersion(), undefined);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 21);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.PUT_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 0);
+            assert.deepStrictEqual(pdu.getDbVersion(), undefined);
         }, done);
     });
 
@@ -149,15 +154,15 @@ describe('kinetic.PDU decoding()', () => {
             "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 25);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.GET);
-            assert.deepEqual(pdu.getClusterVersion(), 0);
-            assert.deepEqual(pdu.getSequence(), 1);
-            assert.deepEqual(pdu.getKey(), new Buffer("qwer"));
-            assert.deepEqual(pdu.getDbVersion(), undefined);
-            assert.deepEqual(pdu.getNewVersion(), undefined);
-            assert.deepEqual(pdu.getForce(), false);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 25);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.GET);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 0);
+            assert.deepStrictEqual(pdu.getSequence(), 1);
+            assert.deepStrictEqual(pdu.getKey(), new Buffer("qwer"));
+            assert.deepStrictEqual(pdu.getDbVersion(), undefined);
+            assert.deepStrictEqual(pdu.getNewVersion(), undefined);
+            assert.deepStrictEqual(pdu.getForce(), false);
         }, done);
     });
 
@@ -170,15 +175,16 @@ describe('kinetic.PDU decoding()', () => {
             "\x2a\x00\x1a\x02\x08\x01ON DIT BONJOUR TOUT LE MONDE", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 31);
-            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
-            assert.deepEqual(pdu.getChunkSize(), 28);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.GET_RESPONSE);
-            assert.deepEqual(pdu.getSequence(), 1);
-            assert.deepEqual(pdu.getKey(), new Buffer("qwer"));
-            assert.deepEqual(pdu.getDbVersion(), new Buffer(''));
-            assert.deepEqual(pdu.getNewVersion(), undefined);
-            assert.deepEqual(pdu.getForce(), false);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 31);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getChunkSize(), 28);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.GET_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 1);
+            assert.deepStrictEqual(pdu.getKey(), new Buffer("qwer"));
+            assert.deepStrictEqual(pdu.getDbVersion(), new Buffer(''));
+            assert.deepStrictEqual(pdu.getNewVersion(), undefined);
+            assert.deepStrictEqual(pdu.getForce(), false);
         }, done);
     });
 
@@ -191,12 +197,12 @@ describe('kinetic.PDU decoding()', () => {
             "\x6e\x67\x22\x04\x31\x32\x33\x34\x48\x01", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 35);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.DELETE);
-            assert.deepEqual(pdu.getClusterVersion(), 0);
-            assert.deepEqual(pdu.getSequence(), 0);
-            assert.deepEqual(pdu.getKey(), new Buffer("string"));
+            assert.deepStrictEqual(pdu.getProtobufSize(), 35);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.DELETE);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 0);
+            assert.deepStrictEqual(pdu.getSequence(), 0);
+            assert.deepStrictEqual(pdu.getKey(), new Buffer("string"));
         }, done);
     });
 
@@ -209,10 +215,11 @@ describe('kinetic.PDU decoding()', () => {
             "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 23);
-            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.DELETE_RESPONSE);
-            assert.deepEqual(pdu.getSequence(), 0);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 23);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.DELETE_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 0);
         }, done);
     });
 
@@ -224,11 +231,11 @@ describe('kinetic.PDU decoding()', () => {
             "\x8d\x2a\x20\x03\x38\x20\x12\x00", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 17);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.FLUSH);
-            assert.deepEqual(pdu.getClusterVersion(), 0);
-            assert.deepEqual(pdu.getSequence(), 3);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 17);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.FLUSH);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 0);
+            assert.deepStrictEqual(pdu.getSequence(), 3);
         }, done);
     });
 
@@ -241,11 +248,12 @@ describe('kinetic.PDU decoding()', () => {
             "\x30\x03\x38\x1f\x1a\x02\x08\x01", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 17);
-            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.FLUSH_RESPONSE);
-            assert.deepEqual(pdu.getSequence(), 3);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 17);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.FLUSH_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 3);
         }, done);
     });
 
@@ -257,13 +265,13 @@ describe('kinetic.PDU decoding()', () => {
             "\x91\x2a\x20\x00\x38\x16\x12\x05\x1a\x03\x08\xd2\x09", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 22);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(),
+            assert.deepStrictEqual(pdu.getProtobufSize(), 22);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(),
                 kinetic.ops.SET_CLUSTER_VERSION);
-            assert.deepEqual(pdu.getClusterVersion(), 0);
-            assert.deepEqual(pdu.getNewClusterVersion(), 1234);
-            assert.deepEqual(pdu.getSequence(), 0);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 0);
+            assert.deepStrictEqual(pdu.getNewClusterVersion(), 1234);
+            assert.deepStrictEqual(pdu.getSequence(), 0);
         }, done);
     });
 
@@ -275,11 +283,12 @@ describe('kinetic.PDU decoding()', () => {
             "\x01\x1a\x07\x53\x55\x43\x43\x45\x53\x53", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 19);
-            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.SETUP_RESPONSE);
-            assert.deepEqual(pdu.getSequence(), 0);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 19);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.SETUP_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 0);
         }, done);
     });
 
@@ -292,11 +301,11 @@ describe('kinetic.PDU decoding()', () => {
             "\x08\x03\x08\x04\x08\x05\x08\x06", "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 33);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.GETLOG);
-            assert.deepEqual(pdu.getClusterVersion(), 0);
-            assert.deepEqual(pdu.getSequence(), 4);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 33);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.GETLOG);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 0);
+            assert.deepStrictEqual(pdu.getSequence(), 4);
         }, done);
     });
 
@@ -334,12 +343,14 @@ describe('kinetic.PDU decoding()', () => {
             "\x60\x0f\x68\x05\x1a\x02\x08\x01",  "ascii");
 
         checkDecoding(rawData, (pdu) => {
-            assert.deepEqual(pdu.getProtobufSize(), 352);
-            assert.deepEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.GETLOG_RESPONSE);
-            assert.deepEqual(pdu.getSequence(), 4);
-            assert.deepEqual(pdu.getLogObject().types, [0, 1, 2, 4, 5, 6]);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 352);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.GETLOG_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 4);
+            assert.deepStrictEqual(pdu.getLogObject().types,
+                [0, 1, 2, 4, 5, 6]);
         }, done);
     });
 
@@ -429,11 +440,11 @@ describe('kinetic.streamToPDU()', () => {
             if (err)
                 return done(err);
 
-            assert.deepEqual(pdu.getProtobufSize(), 20);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP);
-            assert.deepEqual(pdu.getClusterVersion(), 9876798);
-            assert.deepEqual(pdu.getSequence(), 123);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 20);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.NOOP);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 9876798);
+            assert.deepStrictEqual(pdu.getSequence(), 123);
             done();
         });
 
@@ -451,11 +462,11 @@ describe('kinetic.streamToPDU()', () => {
             if (err)
                 return done(err);
 
-            assert.deepEqual(pdu.getProtobufSize(), 20);
-            assert.deepEqual(pdu.getChunkSize(), 0);
-            assert.deepEqual(pdu.getMessageType(), kinetic.ops.NOOP);
-            assert.deepEqual(pdu.getClusterVersion(), 9876798);
-            assert.deepEqual(pdu.getSequence(), 123);
+            assert.deepStrictEqual(pdu.getProtobufSize(), 20);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.NOOP);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 9876798);
+            assert.deepStrictEqual(pdu.getSequence(), 123);
             done();
         });
 
@@ -595,9 +606,9 @@ describe('kinetic.PDU encoding()', () => {
             "\xff\x0f\x48\xc8\x01\x50\xff\xff\xff\xff\x0f\x60\x0f\x68\x05\x1a" +
             "\x02\x08\x01", "ascii");
 
-        // Ignore the timestamp bytes (17 -> 23)
+        // Ignore the timestamp bytes (17 -> 24)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
-        assert(result.slice(23).equals(expected.slice(23)));
+        assert(result.slice(24).equals(expected.slice(24)));
         done();
     });
 
@@ -654,7 +665,7 @@ describe('kinetic.PDU encoding()', () => {
         const pdu = new kinetic.InitPDU(logs);
 
         // the authType 3 is the UNSOLICITEDSTATUS authType
-        assert.deepEqual(pdu.getProtobuf().authType, 3);
+        assert.deepStrictEqual(pdu.getProtobuf().authType, 3);
         done();
     });
 
@@ -1291,7 +1302,7 @@ describe('kinetic LONG number getters ', () => {
             const rawData = new kinetic.NoOpPDU(9223372036854776001).read();
             const k = new kinetic.PDU(rawData);
 
-            assert.deepEqual(k.getSequence(), 9223372036854776000);
+            assert.deepStrictEqual(k.getSequence(), 9223372036854776000);
             logger.info(k.getProtobuf().header.sequence);
             logger.info(k.getSequence());
 
@@ -1304,7 +1315,7 @@ describe('kinetic LONG number getters ', () => {
                 new Buffer(0)).read();
             const k = new kinetic.PDU(rawData);
 
-            assert.deepEqual(k.getSequence(), 9223372036854776000);
+            assert.deepStrictEqual(k.getSequence(), 9223372036854776000);
             logger.info(k.getProtobuf().header.ackSequence);
             logger.info(k.getSequence());
 
@@ -1317,7 +1328,7 @@ describe('kinetic LONG number getters ', () => {
                 {clusterVersion: 9223372036854776000}).read();
             const k = new kinetic.PDU(rawData);
 
-            assert.deepEqual(k.getClusterVersion(), 9223372036854776000);
+            assert.deepStrictEqual(k.getClusterVersion(), 9223372036854776000);
             logger.info(k.getProtobuf().header.clusterVersion);
             logger.info(k.getClusterVersion());
 
