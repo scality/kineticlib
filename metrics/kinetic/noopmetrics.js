@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 
-import kinetic from '../index.js';
+import kinetic from '../../index.js';
 
 let time0 = [];
 let time1 = [];
