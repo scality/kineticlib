@@ -173,6 +173,19 @@ export class PDU extends stream.Readable {
         return this;
     }
 
+    setMessage(command) {
+        this._message = command;
+        this.computeHMAC();
+        return this.setProtobuf({
+            authType: 1,
+            hmacAuth: {
+                identity: 1,
+                hmac: this.getHMAC(),
+            },
+            commandBytes: JSON.stringify(this._message),
+        });
+    }
+
     /**
      * Slice the buffer with the offset and the limit.
      * @param {Object} obj - an object buffer with offset and limit.
@@ -226,7 +239,7 @@ export class PDU extends stream.Readable {
         buf.writeInt32BE(this.getProtobufSize());
         this._hmac = crypto.createHmac("sha1", "asdfasdf");
         this._hmac.update(buf);
-        this._hmac.update(this._message.toBuffer());
+        this._hmac.update(JSON.stringify(this._message));
         this._hmac = this._hmac.digest();
         return this;
     }
@@ -394,7 +407,8 @@ export class PDU extends stream.Readable {
             throw propError("badLength", "PDU message is truncated");
 
         try {
-            this.setProtobuf(JSON.parse(data));
+            this._cmd = JSON.parse(data);
+            this.setProtobuf(JSON.parse(this._cmd.commandBytes));
         } catch (e) {
             if (e.decoded) {
                 this.setProtobuf(e.decoded);
@@ -403,6 +417,9 @@ export class PDU extends stream.Readable {
                     "cannot decode protobuf message: " + e);
             }
         }
+        if (this._cmd.authType === 1 && !this.checkHmacIntegrity(
+                new Buffer(this._cmd.hmacAuth.hmac.data)))
+            throw propError("hmacFail", "HMAC does not match");
     }
 }
 
@@ -504,7 +521,7 @@ export class InitPDU extends PDU {
 
         const connectionID = (new Date).getTime();
 
-        this._message = {
+        this.setMessage({
             header: {
                 connectionID,
                 clusterVersion: Number.isInteger(options.clusterVersion) ?
@@ -516,7 +533,7 @@ export class InitPDU extends PDU {
             status: {
                 code: 1,
             },
-        };
+        });
         return this;
     }
 }
@@ -537,7 +554,7 @@ export class GetLogPDU extends PDU {
 
         const connectionID = (new Date).getTime();
 
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "GETLOG",
                 connectionID,
@@ -549,7 +566,7 @@ export class GetLogPDU extends PDU {
                         options.types : [0, 1, 2, 4, 5, 6],
                 },
             },
-        };
+        });
         return this;
     }
 }
@@ -569,7 +586,7 @@ export class GetLogResponsePDU extends PDU {
 
         const detailedMessage = validateBufferOrStringArgument(errorMessageArg);
 
-        this._message = {
+        this.setMessage({
             header: {
                 ackSequence,
                 messageType: "GETLOG_RESPONSE",
@@ -581,7 +598,7 @@ export class GetLogResponsePDU extends PDU {
                 code,
                 detailedMessage,
             },
-        };
+        });
         return this;
     }
 }
@@ -600,7 +617,7 @@ export class FlushPDU extends PDU {
 
         const connectionID = (new Date).getTime();
 
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "FLUSHALLDATA",
                 connectionID,
@@ -610,7 +627,7 @@ export class FlushPDU extends PDU {
             },
             body: {
             },
-        };
+        });
         return this;
     }
 }
@@ -629,7 +646,7 @@ export class FlushResponsePDU extends PDU {
 
         const detailedMessage = validateBufferOrStringArgument(errorMessageArg);
 
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "FLUSHALLDATA_RESPONSE",
                 ackSequence,
@@ -638,7 +655,7 @@ export class FlushResponsePDU extends PDU {
                 code,
                 detailedMessage,
             },
-        };
+        });
         return this;
     }
 }
@@ -659,7 +676,7 @@ export class SetClusterVersionPDU extends PDU {
 
         const connectionID = (new Date).getTime();
 
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "SETUP",
                 connectionID,
@@ -671,7 +688,7 @@ export class SetClusterVersionPDU extends PDU {
                     newClusterVersion,
                 },
             },
-        };
+        });
         return this;
     }
 }
@@ -690,7 +707,7 @@ export class SetupResponsePDU extends PDU {
 
         const detailedMessage = validateBufferOrStringArgument(errorMessageArg);
 
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "SETUP_RESPONSE",
                 ackSequence,
@@ -699,7 +716,7 @@ export class SetupResponsePDU extends PDU {
                 code,
                 detailedMessage,
             },
-        };
+        });
         return this;
     }
 }
@@ -718,7 +735,7 @@ export class NoOpPDU extends PDU {
 
         const connectionID = (new Date).getTime();
 
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "NOOP",
                 connectionID,
@@ -728,7 +745,7 @@ export class NoOpPDU extends PDU {
             },
             body: {
             },
-        };
+        });
         return this;
     }
 }
@@ -747,7 +764,7 @@ export class NoOpResponsePDU extends PDU {
 
         const detailedMessage = validateBufferOrStringArgument(errorMessageArg);
 
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "NOOP_RESPONSE",
                 ackSequence,
@@ -756,7 +773,7 @@ export class NoOpResponsePDU extends PDU {
                 code,
                 detailedMessage,
             },
-        };
+        });
         return this;
     }
 }
@@ -794,7 +811,7 @@ export class PutPDU extends PDU {
 
         const connectionID = (new Date).getTime();
         this._chunkSize = chunkSize;
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "PUT",
                 connectionID,
@@ -814,7 +831,7 @@ export class PutPDU extends PDU {
                     chunkSize,
                 },
             },
-        };
+        });
         return this;
     }
 }
@@ -833,7 +850,7 @@ export class PutResponsePDU extends PDU {
 
         const detailedMessage = validateBufferOrStringArgument(errorMessageArg);
 
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "PUT_RESPONSE",
                 ackSequence,
@@ -845,7 +862,7 @@ export class PutResponsePDU extends PDU {
                 code,
                 detailedMessage,
             },
-        };
+        });
         return this;
     }
 }
@@ -871,7 +888,7 @@ export class GetPDU extends PDU {
         const key = validateBufferOrStringArgument(keyArg);
         const connectionID = (new Date).getTime();
 
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "GET",
                 connectionID,
@@ -886,7 +903,7 @@ export class GetPDU extends PDU {
                         options.metadataOnly : null,
                 },
             },
-        };
+        });
         return this;
     }
 }
@@ -912,7 +929,7 @@ export class GetResponsePDU extends PDU {
         const dbVersion = validateVersionArgument(dbVersionArg);
 
         this._chunkSize = chunkSize;
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "GET_RESPONSE",
                 ackSequence,
@@ -927,7 +944,7 @@ export class GetResponsePDU extends PDU {
                 code,
                 detailedMessage,
             },
-        };
+        });
         return this;
     }
 }
@@ -961,7 +978,7 @@ export class DeletePDU extends PDU {
             dbVersion = validateVersionArgument(options.dbVersion);
 
         const connectionID = (new Date).getTime();
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "DELETE",
                 connectionID,
@@ -977,7 +994,7 @@ export class DeletePDU extends PDU {
                         options.force : null,
                 },
             },
-        };
+        });
         return this;
     }
 }
@@ -996,7 +1013,7 @@ export class DeleteResponsePDU extends PDU {
 
         const detailedMessage = validateBufferOrStringArgument(errorMessageArg);
 
-        this._message = {
+        this.setMessage({
             header: {
                 messageType: "DELETE_RESPONSE",
                 ackSequence,
@@ -1008,7 +1025,7 @@ export class DeleteResponsePDU extends PDU {
                 code,
                 detailedMessage,
             },
-        };
+        });
         return this;
     }
 }
