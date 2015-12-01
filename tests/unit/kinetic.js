@@ -1221,6 +1221,16 @@ describe('kinetic.PutPDU()', () => {
                 done(e);
         }
     });
+
+    it('should set sequence', (done) => {
+        try {
+            const k = new kinetic.PutPDU(345, "sequence", 12);
+            assert.strictEqual(k.getSequence(), 345);
+            done();
+        } catch (e) {
+            done(e);
+        }
+    });
 });
 
 describe('kinetic.GetPDU()', () => {
@@ -1244,6 +1254,16 @@ describe('kinetic.GetPDU()', () => {
                 done();
             else
                 done(e);
+        }
+    });
+
+    it('should set sequence', (done) => {
+        try {
+            const k = new kinetic.GetPDU(987, "sequence");
+            assert.strictEqual(k.getSequence(), 987);
+            done();
+        } catch (e) {
+            done(e);
         }
     });
 });
