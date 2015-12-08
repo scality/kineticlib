@@ -43,14 +43,14 @@ int main(int argc, char* argv[]) {
   
   message.set_commandbytes(command.SerializeAsString());
   message.set_authtype(com::seagate::kinetic::proto::Message_AuthType_HMACAUTH);
-  message.mutable_hmacauth()->set_identity(1);
+  //  message.mutable_hmacauth()->set_identity(1);
 
   unsigned char result[20];
   unsigned int result_len = 20;
   uint32_t message_length_bigendian = message.commandbytes().length();
   
 
-
+  /*
   // Initialize HMAC object.
   HMAC_CTX ctx;
   HMAC_CTX_init(&ctx);
@@ -59,13 +59,11 @@ int main(int argc, char* argv[]) {
   HMAC_Update(&ctx, reinterpret_cast<const unsigned char *>(message.commandbytes().c_str()),
               message.commandbytes().length());
   cout << message.commandbytes().length() << endl;
-  cout << "qweqweqe" << endl;
   HMAC_Final(&ctx, result, &result_len);
-  cout << "qweqweq2e" << endl;
   HMAC_CTX_cleanup(&ctx);
-  
-  message.mutable_hmacauth()->set_hmac(result);
-  
+
+  message.mutable_hmacauth()->set_hmac(reinterpret_cast<const char *>(result));
+  */
   {
     // Read the existing address book.
     fstream input(argv[1], ios::in | ios::binary);

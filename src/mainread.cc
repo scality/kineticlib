@@ -1,38 +1,39 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <openssl/hmac.h>
+#include <openssl/sha.h>
 #include "kinetic.pb.h"
 using namespace std;
 
-/*
+
 // Iterates though all people in the AddressBook and prints info about them.
-void ListPeople(const com::seagate::kinetic::proto::Command command) {
-    const tutorial::Person& person = address_book.person(i);
+void checkhmac(com::seagate::kinetic::proto::Message message) {
 
-    cout << "Cluster Version : " << command.clusterversion() << endl;
-    cout << "  Name: " << person.name() << endl;
-    if (person.has_email()) {
-      cout << "  E-mail address: " << person.email() << endl;
-    }
+  HMAC_CTX ctx;
+  unsigned char result[20];
+  unsigned int result_len = 20;
+  
 
-    for (int j = 0; j < person.phone_size(); j++) {
-      const tutorial::Person::PhoneNumber& phone_number = person.phone(j);
+  HMAC_CTX_init(&ctx);
 
-      switch (phone_number.type()) {
-      case tutorial::Person::MOBILE:
-        cout << "  Mobile phone #: ";
-        break;
-      case tutorial::Person::HOME:
-        cout << "  Home phone #: ";
-        break;
-      case tutorial::Person::WORK:
-        cout << "  Work phone #: ";
-        break;
-      }
-      cout << phone_number.number() << endl;
-    }
+  HMAC_Init_ex(&ctx, "asdfasdf", 8, EVP_sha1(), NULL);
+  HMAC_Update(&ctx,
+	      reinterpret_cast<const unsigned char *>(message.
+						      commandbytes().
+						      c_str()),
+	      message.commandbytes().length());
+  cout << message.commandbytes().length() << endl;
+  HMAC_Final(&ctx, result, &result_len);
+  HMAC_CTX_cleanup(&ctx);
+
+  EXPECT_EQ(message.mutable_hmacauth()->hmac()), result); 
+  
 }
-*/
+
+
+
+
 // Main function:  Reads the entire address book from a file and prints all
 //   the information inside.
 int main(int argc, char* argv[]) {
@@ -57,6 +58,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
+  //  checkhmac(message.mutable_hmacauth()->hmac(), message);
   command.ParseFromString(message.commandbytes());
   
   cout << "cluster version : " << command.mutable_header()->clusterversion() << endl;
