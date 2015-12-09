@@ -1,7 +1,8 @@
 import assert from 'assert';
-import stream from 'stream';
+import net from 'net';
 import util from 'util';
 
+import posixRead from 'posix-read';
 import winston from 'winston';
 
 import kinetic from '../../index';
@@ -433,98 +434,148 @@ describe('kinetic.PDU decoding()', () => {
 });
 
 describe('kinetic.streamToPDU()', () => {
-    it('should parse one-block stream', (done) => {
-        const sock = new stream.PassThrough();
+    function getNewSocket(callback) {
+        const otherEnd = new net.Socket();
 
-        kinetic.streamToPDU(sock, (err, pdu) => {
-            if (err)
-                return done(err);
+        const server = net.createServer(
+            { pauseOnConnect: true },
+            function onConnection(socket) {
+                server.close();
+                callback(socket, otherEnd);
+            });
 
-            assert.deepStrictEqual(pdu.getCommandSize(), 20);
-            assert.deepStrictEqual(pdu.getChunkSize(), 0);
-            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.NOOP);
-            assert.deepStrictEqual(pdu.getClusterVersion(), 9876798);
-            assert.deepStrictEqual(pdu.getSequence(), 123);
-            done();
+        server.listen(function onListening() {
+            otherEnd.connect(server.address().port);
         });
+    }
 
-        sock.write(new Buffer(
+    it('should parse one-block stream', (done) => {
+        const input = new Buffer(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa\x53\xb4\x15" +
             "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
-            "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12\x00", "ascii"));
+            "\xa0\x85\xc4\x8c\x2a\x20\x7b\x38\x1e\x12\x00", "ascii");
+
+        getNewSocket((socket, otherEnd) => {
+            kinetic.streamToPDU(socket, (err, pdu) => {
+                if (err)
+                    return done(err);
+
+                assert.deepStrictEqual(pdu.getCommandSize(), 20);
+                assert.deepStrictEqual(pdu.getChunkSize(), 0);
+                assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.NOOP);
+                assert.deepStrictEqual(pdu.getClusterVersion(), 9876798);
+                assert.deepStrictEqual(pdu.getSequence(), 123);
+                done();
+            });
+
+            otherEnd.write(input);
+        });
     });
 
     it('should parse multi-part stream', (done) => {
-        const sock = new stream.PassThrough();
-
-        kinetic.streamToPDU(sock, (err, pdu) => {
-            if (err)
-                return done(err);
-
-            assert.deepStrictEqual(pdu.getCommandSize(), 20);
-            assert.deepStrictEqual(pdu.getChunkSize(), 0);
-            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.NOOP);
-            assert.deepStrictEqual(pdu.getClusterVersion(), 9876798);
-            assert.deepStrictEqual(pdu.getSequence(), 123);
-            done();
-        });
-
-        sock.write(new Buffer(
+        const part1 = new Buffer(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa", "ascii"));
-        setTimeout(() => {
-            sock.write(new Buffer(
-                "\x53\xb4\x15\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea" +
-                "\xda\x04\x18\xcd\xa0\x85\xc4\x8c\x2a\x20\x7b\x38", "ascii"));
-        }, 10);
-        setTimeout(() => {
-            sock.write(new Buffer("\x1e\x12\x00", "ascii"));
-        }, 40);
+            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa", "ascii");
+        const part2 = new Buffer(
+            "\x53\xb4\x15\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda" +
+            "\x04\x18\xcd\xa0\x85\xc4\x8c\x2a\x20\x7b\x38", "ascii");
+        const part3 = new Buffer("\x1e\x12\x00", "ascii");
+
+        getNewSocket((socket, otherEnd) => {
+            kinetic.streamToPDU(socket, (err, pdu) => {
+                if (err)
+                    return done(err);
+
+                assert.deepStrictEqual(pdu.getCommandSize(), 20);
+                assert.deepStrictEqual(pdu.getChunkSize(), 0);
+                assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.NOOP);
+                assert.deepStrictEqual(pdu.getClusterVersion(), 9876798);
+                assert.deepStrictEqual(pdu.getSequence(), 123);
+                done();
+            });
+
+            otherEnd.write(part1);
+            setTimeout(() => {
+                otherEnd.write(part2);
+            }, 10);
+            setTimeout(() => {
+                otherEnd.write(part3);
+            }, 40);
+        });
     });
 
     it('should detect truncated stream', (done) => {
-        const sock = new stream.PassThrough();
-
-        kinetic.streamToPDU(sock, (err) => {
-            if (err) {
-                if (err.badLength)
-                    done();
-                else
-                    done(err);
-            } else {
-                done(new Error("No error thrown"));
-            }
-        });
-
-        sock.write(new Buffer(
+        const input = new Buffer(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa", "ascii"));
-        sock.end();
+            "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa", "ascii");
+
+        getNewSocket((socket, otherEnd) => {
+            kinetic.streamToPDU(socket, (err) => {
+                if (err) {
+                    if (err.endOfFile)
+                        done();
+                    else
+                        done(err);
+                } else {
+                    done(new Error("No error thrown"));
+                }
+            });
+
+            otherEnd.end(input);
+        });
     });
 
-    it('should not read extra bytes', (done) => {
-        const sock = new stream.PassThrough();
-
-        kinetic.streamToPDU(sock, (err) => {
-            if (err) {
-                done(err);
-            } else {
-                const chunk = sock.read();
-                if (chunk === null || chunk.length !== 28)
-                    done(new Error(
-                            "chunk has already been read from the socket"));
-                else
-                    done();
-            }
-        });
-
-        sock.write(new Buffer(
+    it("should not consume chunk data (with on('data'))", (done) => {
+        const input = new Buffer(
             "\x46\x00\x00\x00\x3e\x00\x00\x00\x1c\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x7d\x41\xc3\xd7\x37\xb9\x69\x82\xef\xb5\x2d\x7b\xc3\x9f\x47" +
             "\x35\x82\x92\x29\x6d\x3a\x20\x0a\x0d\x08\x00\x18\xdb\x9e\xcc\xc0" +
             "\x8d\x2a\x20\x00\x38\x04\x12\x0f\x0a\x0d\x12\x01\x31\x1a\x04qwer" +
-            "\x22\x00\x48\x01ON DIT BONJOUR TOUT LE MONDE", "ascii"));
+            "\x22\x00\x48\x01ON DIT BONJOUR TOUT LE MONDE", "ascii");
+
+        getNewSocket((socket, otherEnd) => {
+            kinetic.streamToPDU(socket, (err) => {
+                if (err)
+                    return done(err);
+
+                socket.on('data', (chunk) => {
+                    assert.deepStrictEqual(
+                        chunk, new Buffer("ON DIT BONJOUR TOUT LE MONDE"));
+                    done();
+                });
+                socket.resume();
+            });
+
+            otherEnd.write(input);
+        });
+    });
+
+    it('should not consume chunk data (with read())', (done) => {
+        const input = new Buffer(
+            "\x46\x00\x00\x00\x3e\x00\x00\x00\x1c\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x7d\x41\xc3\xd7\x37\xb9\x69\x82\xef\xb5\x2d\x7b\xc3\x9f\x47" +
+            "\x35\x82\x92\x29\x6d\x3a\x20\x0a\x0d\x08\x00\x18\xdb\x9e\xcc\xc0" +
+            "\x8d\x2a\x20\x00\x38\x04\x12\x0f\x0a\x0d\x12\x01\x31\x1a\x04qwer" +
+            "\x22\x00\x48\x01ON DIT BONJOUR TOUT LE MONDE", "ascii");
+
+        getNewSocket((socket, otherEnd) => {
+            kinetic.streamToPDU(socket, (err) => {
+                if (err)
+                    return done(err);
+
+                posixRead(socket, 14, (err, chunk) => {
+                    if (err)
+                        return done(err);
+
+                    assert.deepStrictEqual(chunk, new Buffer("ON DIT BONJOUR"));
+                    done();
+                });
+                socket.resume();
+            });
+
+            otherEnd.write(input);
+        });
     });
 });
 

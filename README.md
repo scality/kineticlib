@@ -62,14 +62,19 @@ if (type === kinetic.ops.GET)
 
 Asynchronously decode a PDU from a stream (e.g. a socket):
 
+Note: the socket must be paused (in practice, use the `pauseOnConnect` option
+when creating a `net.Server`).
+
 ```js
 kinetic.streamToPDU(socket, (err, pdu) => {
     if (err) {
         handleErr(err);
     } else {
         if (pdu.getMessageType() === kinetic.ops.GET_RESPONSE) {
-            const chunk = socket.read();
-            // ...
+            socket.resume();  // set the socket back in non-paused mode
+            socket.on('data', (chunk) => {
+                // ...
+            });
         }
     }
 });

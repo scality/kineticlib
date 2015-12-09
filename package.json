@@ -19,6 +19,7 @@
         "protocol"
     ],
     "dependencies": {
+        "posix-read": "^0.2.0",
         "protobufjs": "^4.0.0",
         "winston": "^1.1.0"
     },
