@@ -18,6 +18,9 @@ std::string computeHmac(const Message& message, const std::string& key) {
 
   HMAC_CTX_init(&ctx);
   HMAC_Init_ex(&ctx, key.c_str(), key.length(), EVP_sha1(), NULL);
+  uint32_t message_length_bigendian = htonl(message.commandbytes().length());
+  HMAC_Update(&ctx, reinterpret_cast<unsigned char *>(&message_length_bigendian),
+              sizeof(uint32_t));
   HMAC_Update(&ctx,
               reinterpret_cast<const unsigned char *>(message.
                                                       commandbytes().
@@ -63,13 +66,13 @@ bool validateHmac(const Message& message,
  */
 static v8::Local<v8::Value> ErrorWithProperty(const char *property,
                                               const char *message) {
-    v8::Local<v8::Value> error = Nan::Error(message);
+  v8::Local<v8::Value> error = Nan::Error(message);
 
-    v8::Local<v8::String> key = Nan::New<v8::String>(property)
-            .ToLocalChecked();
-    error.As<v8::Object>()->Set(key, Nan::True());
+  v8::Local<v8::String> key = Nan::New<v8::String>(property)
+    .ToLocalChecked();
+  error.As<v8::Object>()->Set(key, Nan::True());
 
-    return error;
+  return error;
 }
 
 class KineticCreatePDU : public Nan::AsyncWorker {
@@ -79,7 +82,7 @@ private:
   size_t       sequence;
   std::string  output;
   char*        result;
-  std::string  test;
+
   const char *error_prop = NULL;
   
 public:
@@ -98,18 +101,15 @@ public:
   void Execute() {
     Command command;
     Message message;
-    Command commandParse;
-    Message messageParse;    
 
-    if (request == 30){
+    if (request == 30 || request == 29){
       command.mutable_header()->set_clusterversion(0);
       command.mutable_header()->set_connectionid(1234);
       command.mutable_header()->set_sequence(sequence);
       command.mutable_header()->set_messagetype(com::seagate::kinetic::proto::Command_MessageType_NOOP);
     }
 
-    command.SerializeToString(&test);
-    message.set_commandbytes(test);
+    message.set_commandbytes(command.SerializeAsString());
     message.set_authtype(com::seagate::kinetic::proto::Message_AuthType_HMACAUTH);
     message.mutable_hmacauth()->set_identity(1);
 
@@ -167,7 +167,7 @@ public:
    * go on `this`.
    */
   void Execute() {
-
+   
     if (!message.ParseFromString(request)){
       cout << "Failed to parse the binary string in message" << endl;
     } else {
@@ -177,7 +177,6 @@ public:
         }
       }
     }
-
     google::protobuf::ShutdownProtobufLibrary();
   }
 
@@ -187,22 +186,31 @@ public:
    */
   void HandleOKCallback() {
     Nan::HandleScope scope;
-    v8::Local<v8::Object> test = Nan::New<v8::Object>();
-    Nan::Set(test, Nan::New("clusterVersion").ToLocalChecked(),
+    v8::Local<v8::Object> pduObject = Nan::New<v8::Object>();
+    Nan::Set(pduObject, Nan::New("clusterVersion").ToLocalChecked(),
              Nan::New((uint32_t)command.mutable_header()->clusterversion()));
-    Nan::Set(test, Nan::New("ConnectionID").ToLocalChecked(),
+    Nan::Set(pduObject, Nan::New("ConnectionID").ToLocalChecked(),
              Nan::New((uint32_t)command.mutable_header()->connectionid()));
-    Nan::Set(test, Nan::New("sequence").ToLocalChecked(),
-             Nan::New((uint32_t)command.mutable_header()->sequence()));
-    Nan::Set(test, Nan::New("messageType").ToLocalChecked(),
-             Nan::New((uint32_t)command.mutable_header()->messagetype()));
-    v8::Local<v8::Value> argv[] = { Nan::Null(), test};
+    if (command.mutable_header()->sequence())
+      Nan::Set(pduObject, Nan::New("sequence").ToLocalChecked(),
+               Nan::New((uint32_t)command.mutable_header()->sequence()));
+    else 
+      Nan::Set(pduObject, Nan::New("sequence").ToLocalChecked(),
+               Nan::New((uint32_t)command.mutable_header()->acksequence()));     
+    if (command.mutable_header()->messagetype() < 100 && command.mutable_header()->messagetype() > 1)
+      Nan::Set(pduObject, Nan::New("messageType").ToLocalChecked(),
+               Nan::New((uint32_t)command.mutable_header()->messagetype()));
+    else
+      Nan::Set(pduObject, Nan::New("messageType").ToLocalChecked(),
+               Nan::New("null").ToLocalChecked());
+    Nan::Set(pduObject, Nan::New("statusCode").ToLocalChecked(),
+             Nan::New((uint32_t)command.mutable_status()->code()));
+    v8::Local<v8::Value> argv[] = { Nan::Null(), pduObject};
     callback->Call(2, argv);
   }
 
   void HandleErrorCallback() {
     Nan::HandleScope scope;
-
     v8::Local<v8::Value> argv[] = {
       ErrorWithProperty(error_prop, ErrorMessage()) };
     callback->Call(1, argv);
@@ -224,9 +232,7 @@ void Read(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   size_t        bufferLength = node::Buffer::Length(bufferObj);
   char*         bufferData   = node::Buffer::Data(bufferObj);
 
-  cout << "INPUT SIZE : " << bufferLength << endl;
-
-  std::string test(bufferData, bufferLength);
+  std::string data(bufferData, bufferLength);
   
   if (!info[1]->IsFunction()) {
     Nan::ThrowTypeError("second argument should be a function");
@@ -235,7 +241,7 @@ void Read(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   
   Nan::Callback *callback = new Nan::Callback(info[1].As<v8::Function>());
 
-  Nan::AsyncQueueWorker(new KineticParsePDU(callback, test));
+  Nan::AsyncQueueWorker(new KineticParsePDU(callback, data));
   return;
 }
 
