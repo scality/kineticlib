@@ -3,60 +3,16 @@
 #include <string.h>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
-
-#include "./kinetic.pb.h"
-
 #include <nan.h>
+
+#include "put.h"
+#include "hmacprovider.h"
+#include "errorProp.h"
+#include "kinetic.pb.h"
 
 using com::seagate::kinetic::proto::Command;
 using com::seagate::kinetic::proto::Message;
 using namespace std;
-
-std::string computeHmac(const Message& message, const std::string& key) {
-
-  HMAC_CTX ctx;
-
-  HMAC_CTX_init(&ctx);
-  HMAC_Init_ex(&ctx, key.c_str(), key.length(), EVP_sha1(), NULL);
-  uint32_t message_length_bigendian = htonl(message.commandbytes().length());
-  HMAC_Update(&ctx, reinterpret_cast<unsigned char *>(&message_length_bigendian),
-              sizeof(uint32_t));
-  HMAC_Update(&ctx,
-              reinterpret_cast<const unsigned char *>(message.
-                                                      commandbytes().
-                                                      c_str()),
-              message.commandbytes().length());
-
-  unsigned char result[SHA_DIGEST_LENGTH];
-  unsigned int result_len = SHA_DIGEST_LENGTH;
-
-  HMAC_Final(&ctx, result, &result_len);
-  HMAC_CTX_cleanup(&ctx);
-
-  return std::string(reinterpret_cast<char *>(result), result_len);
-}
-      
-bool validateHmac(const Message& message,
-                  const std::string& key) {
-  std::string correct_hmac(computeHmac(message, key));
-  
-  if (!message.has_hmacauth()) {
-    return false;
-  }
-
-  const std::string &provided_hmac = message.hmacauth().hmac();
-
-  if (provided_hmac.length() != correct_hmac.length()) {
-    return false;
-  }
-
-  int result = 0;
-  for (size_t i = 0; i < correct_hmac.length(); i++) {
-    result |= provided_hmac[i] ^ correct_hmac[i];
-  }
-
-  return result == 0;
-}
 
 /*
  * Equivalent of:
@@ -80,6 +36,7 @@ class KineticCreatePDU : public Nan::AsyncWorker {
 private:
   size_t       request;
   size_t       sequence;
+  std::string  key;
   std::string  output;
   char*        result;
 
@@ -88,8 +45,9 @@ private:
 public:
   KineticCreatePDU(Nan::Callback *callback,
                    size_t request,
-                   size_t sequence)
-    : Nan::AsyncWorker(callback), request(request), sequence(sequence) { }
+                   size_t sequence,
+                   std::string key = 0)
+    : Nan::AsyncWorker(callback), request(request), sequence(sequence), key(key) { }
 
   ~KineticCreatePDU() {}
 
@@ -102,11 +60,22 @@ public:
     Command command;
     Message message;
 
-    if (request == 30 || request == 29){
+    if (request == 30){
       command.mutable_header()->set_clusterversion(0);
       command.mutable_header()->set_connectionid(1234);
       command.mutable_header()->set_sequence(sequence);
       command.mutable_header()->set_messagetype(com::seagate::kinetic::proto::Command_MessageType_NOOP);
+    }
+    else if (request == 4){
+      command.mutable_header()->set_clusterversion(0);
+      command.mutable_header()->set_connectionid(1234);
+      command.mutable_header()->set_sequence(sequence);
+      command.mutable_header()->set_messagetype(com::seagate::kinetic::proto::Command_MessageType_PUT);
+      command.mutable_body()->mutable_keyvalue()->
+        set_synchronization(com::seagate::kinetic::proto::Command_Synchronization_WRITETHROUGH);
+      command.mutable_body()->mutable_keyvalue()->set_key(key);
+      //      command.mutable_body()->mutable_keyvalue()->set_dbversion();
+      //      command.mutable_body()->mutable_keyvalue()->set_newversion();
     }
 
     message.set_commandbytes(command.SerializeAsString());
@@ -120,7 +89,7 @@ public:
     result = new char[output.size()];
     std::copy(output.begin(), output.end(), result);
 
-    google::protobuf::ShutdownProtobufLibrary();
+    //    google::protobuf::ShutdownProtobufLibrary();
   }
 
   /*
@@ -169,15 +138,15 @@ public:
   void Execute() {
    
     if (!message.ParseFromString(request)){
-      cout << "Failed to parse the binary string in message" << endl;
+      cout << "Failed to parse the binary string in message(message1)" << endl;
     } else {
       if (validateHmac(message, "asdfasdf")){
         if (!command.ParseFromString(message.commandbytes())){
-          std::cout << "Failed to parse the binary string" << std::endl;
+          std::cout << "Failed to parse the binary string(command2)" << std::endl;
         }
       }
     }
-    google::protobuf::ShutdownProtobufLibrary();
+    //    google::protobuf::ShutdownProtobufLibrary();
   }
 
   /*
@@ -242,11 +211,12 @@ void Read(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   Nan::Callback *callback = new Nan::Callback(info[1].As<v8::Function>());
 
   Nan::AsyncQueueWorker(new KineticParsePDU(callback, data));
+
   return;
 }
 
 void Write(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-  if (info.Length() != 3) {
+  if (info.Length() < 3 || info.Length() > 4) {
     Nan::ThrowTypeError("wrong number of arguments");
     return;
   }
@@ -256,10 +226,27 @@ void Write(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     return;
   }
   
+  size_t request = Nan::To<int>(info[0]).FromJust();
   size_t sequence = Nan::To<int>(info[1]).FromJust();
 
-  size_t request = Nan::To<int>(info[0]).FromJust();
-   
+  if (request == 4){
+
+    v8::Local<v8::Object> bufferKeyObj    = Nan::To<v8::Object>(info[2]).ToLocalChecked();
+    size_t        bufferKeyLength = node::Buffer::Length(bufferKeyObj);
+    char*         bufferKey   = node::Buffer::Data(bufferKeyObj);
+
+    std::string key(bufferKey, bufferKeyLength);
+
+    cout << key << endl;
+    if (!info[3]->IsFunction()) {
+      Nan::ThrowTypeError("third argument should be a function");
+      return;
+    }
+    Nan::Callback *callback = new Nan::Callback(info[3].As<v8::Function>());
+    Nan::AsyncQueueWorker(new KineticPUTPDU(callback, request, sequence, key));
+    return;
+  }
+  
   if (!info[2]->IsFunction()) {
     Nan::ThrowTypeError("third argument should be a function");
     return;
@@ -274,7 +261,6 @@ void Init(v8::Local<v8::Object> exports) {
                Nan::New<v8::FunctionTemplate>(Read)->GetFunction());
   exports->Set(Nan::New("write").ToLocalChecked(),
                Nan::New<v8::FunctionTemplate>(Write)->GetFunction());
-
 }
 
 NODE_MODULE(kineticcpp, Init)

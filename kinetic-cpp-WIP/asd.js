@@ -12,7 +12,7 @@ const HEADER_CHUNKSZ_OFFSET = 5;
 const sock = new net.Socket();
 let data = new Buffer(0);
 let d = new Buffer(0);
-
+const chunk = crypto.randomBytes(256);
 const treatment = function (sock, callback) {
     sock.on('readable', function () {
 
@@ -31,6 +31,7 @@ const treatment = function (sock, callback) {
             data = d;
             return;  // need to wait for more data
         }
+ //       console.log(d);
         kinetic.read(d.slice(HEADER_SZ), (err, pdu) => {
             callback(err, pdu);
         })
@@ -41,11 +42,11 @@ const treatment = function (sock, callback) {
     });
 }
 
-let i = 1;
+
 
 sock.connect(8123, '127.0.0.1', function() {
     const time0 = process.hrtime();
-/*    const interval = setInterval(() => {
+/*    for (let i = 0; i < 1000; i++){
         try {
             kinetic.write(30, i, function(err, data){
                 if (err) {
@@ -62,12 +63,34 @@ sock.connect(8123, '127.0.0.1', function() {
         } catch (err) {
             console.log(err);
         }
-        if (i === 10000){
+    } */
+    let key = new Buffer("qwerty");
+
+    let i = 1;
+    const interval = setInterval(() => {
+        try {
+            kinetic.write(4, i, key, function(err, data){
+                if (err) {
+                    console.log(err);
+                } else {
+                    const header = new Buffer(HEADER_SZ);
+                    header.writeInt8(VERSION, HEADER_VERSION_OFFSET);
+                    header.writeInt32BE(data.length, HEADER_PBUFSZ_OFFSET);
+                    header.writeInt32BE(chunk.length, HEADER_CHUNKSZ_OFFSET);
+                    sock.write(header);
+                    sock.write(data);
+                    sock.write(chunk);
+                }
+            });
+        } catch (err) {
+            console.log(err);
+        }
+        if (i === 10){
             clearInterval(interval);
         }
         i++;
     }, 1);
-*/
+/*
     try {
         kinetic.write(30, 1, function(err, data){
             if (err) {
@@ -84,8 +107,11 @@ sock.connect(8123, '127.0.0.1', function() {
     } catch (err) {
         console.log(err);
     }
-    
+    */
     treatment(sock, (err, pdu) => {
-        console.log(pdu);
+        if (pdu.messageType !== "null")
+            console.log(pdu);
+        if (pdu.sequence === 10)
+            sock.end();
     });  
 });            
