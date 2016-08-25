@@ -1,11 +1,11 @@
-import assert from 'assert';
-import net from 'net';
-import util from 'util';
+const assert = require('assert');
+const net = require('net');
+const util = require('util');
 
-import posixRead from 'posix-read';
-import winston from 'winston';
+const posixRead = require('posix-read');
+const winston = require('winston');
 
-import kinetic from '../../index';
+const kinetic = require('../../index');
 
 const logger = new (winston.Logger)({
     transports: [new (winston.transports.Console)({ level: 'error' })]
