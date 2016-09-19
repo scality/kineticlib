@@ -9,7 +9,7 @@
         { "name": "Michael Zapata", "email": "" },
         { "name": "Adrien Vergé", "email": "" }
     ],
-    "license": "ISC",
+    "license": "Apache-2.0",
     "bugs": {
         "url": "https://github.com/scality/kineticlib/issues"
     },
