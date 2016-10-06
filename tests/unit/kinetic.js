@@ -27,7 +27,7 @@ describe('kinetic.PDU decoding()', () => {
          * Note: expected buffers formatted using:
          *   hexdump -C FILE | cut -b10-33,35-58 | sed 's/\s\+$//g;s/ /\\x/g'
          */
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x01\x5a\x00\x00\x00\x00\x20\x03\x3a\xd5\x02\x0a\x09" +
             "\x08\x00\x18\xc2\xea\x9d\xe4\x91\x2a\x12\xc3\x02\x32\xc0\x02\x2a" +
             "\x86\x02\x2a\x07\x53\x65\x61\x67\x61\x74\x65\x32\x09\x53\x69\x6d" +
@@ -68,7 +68,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should parse valid NOOP', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa\x53\xb4\x15" +
             "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
@@ -88,7 +88,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should parse valid NOOP_RESPONSE', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x2f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x62\x0c\xb9\x95\xa8\x03\x38\xe4\x79\x5f\xac\xe0\x21\x8c\xbd" +
             "\x11\xaf\x14\x74\x83\x3a\x11\x0a\x0b\x18\xa9\xc4\xd2\x92\x8d\x2a" +
@@ -105,7 +105,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should parse valid PUT', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x41\x00\x00\x00\x28\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x3b\xad\xea\x16\x6f\x8b\x37\xff\xf6\xd6\x0d\x03\x24\xf1\xb5" +
             "\x53\xa9\x14\xbb\xc6\x3a\x23\x0a\x0e\x08\xc5\x0f\x18\xf8\x87\xcd" +
@@ -119,17 +119,17 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.PUT);
             assert.deepStrictEqual(pdu.getClusterVersion(), 1989);
             assert.deepStrictEqual(pdu.getSequence(), 1);
-            assert.deepStrictEqual(pdu.getKey(), new Buffer("mykey"));
+            assert.deepStrictEqual(pdu.getKey(), Buffer.from("mykey", 'utf8'));
             assert.deepStrictEqual(pdu.getDbVersion(),
-                new Buffer('ã', 'ascii'));
+                Buffer.from('ã', 'ascii'));
             assert.deepStrictEqual(pdu.getNewVersion(),
-                new Buffer('ã', 'ascii'));
+                Buffer.from('ã', 'ascii'));
             assert.deepStrictEqual(pdu.getForce(), false);
         }, done);
     });
 
     it('should parse valid PUT_RESPONSE', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x33\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x01\x6d\x91\xa7\x8c\x67\xdf\x96\x1f\xca\x53\xa5\xa5\x0b\xdf" +
             "\xa5\xe6\x4f\x0a\xe2\x3a\x15\x0a\x0b\x18\x8d\xc4\xd2\x92\x8d\x2a" +
@@ -147,7 +147,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should parse valid GET', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x37\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xb6\x8a\x74\x54\x51\xf1\xcb\x4a\x99\xe2\x78\x3c\x29\x15\x45" +
             "\x21\x42\x45\xc0\x33\x3a\x19\x0a\x0d\x08\x00\x18\xd6\xec\xde\x95" +
@@ -160,7 +160,7 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.GET);
             assert.deepStrictEqual(pdu.getClusterVersion(), 0);
             assert.deepStrictEqual(pdu.getSequence(), 1);
-            assert.deepStrictEqual(pdu.getKey(), new Buffer("qwer"));
+            assert.deepStrictEqual(pdu.getKey(), Buffer.from("qwer", 'utf8'));
             assert.deepStrictEqual(pdu.getDbVersion(), undefined);
             assert.deepStrictEqual(pdu.getNewVersion(), undefined);
             assert.deepStrictEqual(pdu.getForce(), false);
@@ -168,7 +168,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should parse valid GET_RESPONSE', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x3d\x00\x00\x00\x1c\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x40\x97\x7d\x14\xc5\xb3\xd4\x17\x87\x27\x23\xcf\xb7\x25\x8d" +
             "\x6a\x36\xbe\x54\xe2\x3a\x1f\x0a\x0b\x18\xab\xdf\x96\xf5\x8c\x2a" +
@@ -182,15 +182,15 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepStrictEqual(pdu.getMessageType(),
                 kinetic.ops.GET_RESPONSE);
             assert.deepStrictEqual(pdu.getSequence(), 1);
-            assert.deepStrictEqual(pdu.getKey(), new Buffer("qwer"));
-            assert.deepStrictEqual(pdu.getDbVersion(), new Buffer(''));
+            assert.deepStrictEqual(pdu.getKey(), Buffer.from("qwer", 'utf8'));
+            assert.deepStrictEqual(pdu.getDbVersion(), Buffer.from('', 'utf8'));
             assert.deepStrictEqual(pdu.getNewVersion(), undefined);
             assert.deepStrictEqual(pdu.getForce(), false);
         }, done);
     });
 
     it('should parse valid DELETE', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x41\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xf7\x12\xbb\xff\x62\x2b\x2b\xa3\x1a\xab\x42\xdd\x3d\x61\x83" +
             "\x92\xa6\xe0\x07\x34\x3a\x23\x0a\x0d\x08\x00\x18\x83\xd1\x9b\xb8" +
@@ -203,12 +203,12 @@ describe('kinetic.PDU decoding()', () => {
             assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.DELETE);
             assert.deepStrictEqual(pdu.getClusterVersion(), 0);
             assert.deepStrictEqual(pdu.getSequence(), 0);
-            assert.deepStrictEqual(pdu.getKey(), new Buffer("string"));
+            assert.deepStrictEqual(pdu.getKey(), Buffer.from("string", 'utf8'));
         }, done);
     });
 
     it('should parse valid DELETE_RESPONSE', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x35\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x1b\x4b\xa0\xe1\x25\xdb\xd0\x90\xbd\x1b\x96\xcd\xf6\x97\x14" +
             "\x23\x12\xfe\xb8\x2c\x3a\x17\x0a\x04\x30\x00\x38\x05\x12\x02\x0a" +
@@ -225,7 +225,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should parse valid FLUSH', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x2f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x51\xb0\x2c\x5f\xad\x9e\x5a\x59\x85\x9c\xa2\x91\x53\xd4\x47" +
             "\xe1\x1f\x6b\x73\x8e\x3a\x11\x0a\x0d\x08\x00\x18\xe3\xec\xde\x95" +
@@ -242,7 +242,7 @@ describe('kinetic.PDU decoding()', () => {
 
 
     it('should parse valid FLUSH_RESPONSE', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x2f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x54\x1a\xc5\x91\x49\xdf\xf4\x1d\x5d\xdd\x73\xac\x23\xce\xeb" +
             "\xe0\x10\x74\xf8\x1a\x3a\x11\x0a\x0b\x18\xad\xc4\xd2\x92\x8d\x2a" +
@@ -259,7 +259,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should parse valid SetClusterVersion', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x34\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xde\xb2\xcf\xf8\x3b\x95\x83\x83\x72\xf0\xb3\xbb\xd6\xcd\xa0" +
             "\x70\x21\x07\xe1\xf0\x3a\x16\x0a\x0d\x08\x00\x18\xed\x95\xcb\xb9" +
@@ -277,7 +277,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should parse valid SETUP_RESPONSE', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x31\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x6e\xe5\xc4\x5e\xa6\x02\x42\xa9\x55\x33\x68\xf0\x5e\x3b\xc9" +
             "\xb9\x89\x96\x7d\xa7\x3a\x13\x0a\x04\x30\x00\x38\x15\x1a\x0b\x08" +
@@ -294,7 +294,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should parse valid GETLOG', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x3f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xcf\xa0\xb4\xec\xc7\x18\xd6\x1f\x55\x6f\xd8\xde\xd4\x91\x3b" +
             "\x5a\xaf\x7d\x91\x19\x3a\x21\x0a\x0d\x08\x00\x18\xec\xec\xde\x95" +
@@ -316,7 +316,7 @@ describe('kinetic.PDU decoding()', () => {
          *  issue #29 : https://github.com/scality/IronMan-Arsenal/issues/29
          */
     it('should parse valid GETLOG_RESPONSE', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x01\x7f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xc3\x10\xd3\x89\xce\xf8\x78\xb0\x3d\x30\x1b\x33\xb7\xbf\xa1" +
             "\x55\xc9\x5e\x40\x15\x3a\xe0\x02\x0a\x0b\x18\xff\xdc\xe3\xba\x8d" +
@@ -356,7 +356,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should detect PDU with invalid version', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x47\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa\x53\xb4\x15" +
             "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
@@ -377,7 +377,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should detect PDU with truncated header', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x01\x7f\x00\x00\x00\x00", "ascii");
 
         try {
@@ -393,7 +393,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should detect PDU with truncated message', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa\x53\xb4\x15" +
             "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
@@ -412,7 +412,7 @@ describe('kinetic.PDU decoding()', () => {
     });
 
     it('should detect PDU with bad HMAC', (done) => {
-        const rawData = new Buffer(
+        const rawData = Buffer.from(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x71\x14\x62\x07\x0b\x41\xf4\xb0\x22\xd1\x93\xfa\x53\xb4\x15" +
             "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
@@ -450,7 +450,7 @@ describe('kinetic.streamToPDU()', () => {
     }
 
     it('should parse one-block stream', (done) => {
-        const input = new Buffer(
+        const input = Buffer.from(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa\x53\xb4\x15" +
             "\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\xcd" +
@@ -474,13 +474,13 @@ describe('kinetic.streamToPDU()', () => {
     });
 
     it('should parse multi-part stream', (done) => {
-        const part1 = new Buffer(
+        const part1 = Buffer.from(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa", "ascii");
-        const part2 = new Buffer(
+        const part2 = Buffer.from(
             "\x53\xb4\x15\xf0\x4b\xb6\xba\xa2\x3a\x14\x0a\x10\x08\xbe\xea\xda" +
             "\x04\x18\xcd\xa0\x85\xc4\x8c\x2a\x20\x7b\x38", "ascii");
-        const part3 = new Buffer("\x1e\x12\x00", "ascii");
+        const part3 = Buffer.from("\x1e\x12\x00", "ascii");
 
         getNewSocket((socket, otherEnd) => {
             kinetic.streamToPDU(socket, (err, pdu) => {
@@ -506,7 +506,7 @@ describe('kinetic.streamToPDU()', () => {
     });
 
     it('should detect truncated stream', (done) => {
-        const input = new Buffer(
+        const input = Buffer.from(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x70\x14\x62\x07\x0b\x41\xf4\xb0\x21\xd1\x93\xfa", "ascii");
 
@@ -527,7 +527,7 @@ describe('kinetic.streamToPDU()', () => {
     });
 
     it("should not consume chunk data (with on('data'))", (done) => {
-        const input = new Buffer(
+        const input = Buffer.from(
             "\x46\x00\x00\x00\x3e\x00\x00\x00\x1c\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x7d\x41\xc3\xd7\x37\xb9\x69\x82\xef\xb5\x2d\x7b\xc3\x9f\x47" +
             "\x35\x82\x92\x29\x6d\x3a\x20\x0a\x0d\x08\x00\x18\xdb\x9e\xcc\xc0" +
@@ -540,8 +540,8 @@ describe('kinetic.streamToPDU()', () => {
                     return done(err);
 
                 socket.on('data', (chunk) => {
-                    assert.deepStrictEqual(
-                        chunk, new Buffer("ON DIT BONJOUR TOUT LE MONDE"));
+                    assert.deepStrictEqual(chunk,
+                        Buffer.from("ON DIT BONJOUR TOUT LE MONDE", 'utf8'));
                     done();
                 });
                 socket.resume();
@@ -552,7 +552,7 @@ describe('kinetic.streamToPDU()', () => {
     });
 
     it('should not consume chunk data (with read())', (done) => {
-        const input = new Buffer(
+        const input = Buffer.from(
             "\x46\x00\x00\x00\x3e\x00\x00\x00\x1c\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x7d\x41\xc3\xd7\x37\xb9\x69\x82\xef\xb5\x2d\x7b\xc3\x9f\x47" +
             "\x35\x82\x92\x29\x6d\x3a\x20\x0a\x0d\x08\x00\x18\xdb\x9e\xcc\xc0" +
@@ -568,7 +568,8 @@ describe('kinetic.streamToPDU()', () => {
                     if (err)
                         return done(err);
 
-                    assert.deepStrictEqual(chunk, new Buffer("ON DIT BONJOUR"));
+                    assert.deepStrictEqual(chunk,
+                        Buffer.from("ON DIT BONJOUR", 'utf8'));
                     done();
                 });
                 socket.resume();
@@ -579,7 +580,7 @@ describe('kinetic.streamToPDU()', () => {
     });
 
     it('should accept 50 transactions in the same TCP session', (done) => {
-        const input = new Buffer(
+        const input = Buffer.from(
             "\x46\x00\x00\x00\x3e\x00\x00\x00\x1c\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x7d\x41\xc3\xd7\x37\xb9\x69\x82\xef\xb5\x2d\x7b\xc3\x9f\x47" +
             "\x35\x82\x92\x29\x6d\x3a\x20\x0a\x0d\x08\x00\x18\xdb\x9e\xcc\xc0" +
@@ -596,8 +597,9 @@ describe('kinetic.streamToPDU()', () => {
                         if (err)
                             return done(err);
 
-                        assert.deepStrictEqual(
-                            chunk, new Buffer("ON DIT BONJOUR TOUT LE MONDE"));
+                        assert.deepStrictEqual(chunk,
+                            Buffer.from("ON DIT BONJOUR TOUT LE MONDE", 'utf8')
+                        );
 
                         if (n > 0)
                             newTransaction(n - 1);
@@ -624,8 +626,8 @@ describe('kinetic.PDU encoding()', () => {
             configuration: {
                 vendor: 'Seagate',
                 model: 'Simulator',
-                serialNumber: new Buffer('qwerty1234'),
-                worldWideName: new Buffer('kinetic'),
+                serialNumber: Buffer.from('qwerty1234', 'utf8'),
+                worldWideName: Buffer.from('kinetic', 'utf8'),
                 version: '0.8.0.4-SNAPSHOT',
                 compilationDate: 'Wed Nov 18 20:08:27 CET 2015',
                 sourceHash: '4026da95012a74f137005362a419466dbcb2ae5a',
@@ -667,7 +669,7 @@ describe('kinetic.PDU encoding()', () => {
 
         const result = new kinetic.InitPDU(logs).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x01\x5a\x00\x00\x00\x00\x20\x03\x3a\xd5\x02\x0a\x09" +
             "\x08\x00\x18\xc2\xea\x9d\xe4\x91\x2a\x12\xc3\x02\x32\xc0\x02\x2a" +
             "\x86\x02\x2a\x07\x53\x65\x61\x67\x61\x74\x65\x32\x09\x53\x69\x6d" +
@@ -707,8 +709,8 @@ describe('kinetic.PDU encoding()', () => {
             configuration: {
                 vendor: 'Seagate',
                 model: 'Simulator',
-                serialNumber: new Buffer('qwerty1234'),
-                worldWideName: new Buffer('kinetic'),
+                serialNumber: Buffer.from('qwerty1234', 'utf8'),
+                worldWideName: Buffer.from('kinetic', 'utf8'),
                 version: '0.8.0.4-SNAPSHOT',
                 compilationDate: 'Wed Nov 18 20:08:27 CET 2015',
                 sourceHash: '4026da95012a74f137005362a419466dbcb2ae5a',
@@ -760,7 +762,7 @@ describe('kinetic.PDU encoding()', () => {
         const result = new kinetic.NoOpPDU(123, {clusterVersion: 9876798})
             .read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xde\x57\x30\x36\x5a\x4a\x6f\xb7\x88\x02\x0b\xc4\x38\x0f\x76" +
             "\xd9\xf1\xae\x57\x3b\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\x82" +
@@ -775,9 +777,10 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid NOOP_RESPONSE', (done) => {
-        const result = new kinetic.NoOpResponsePDU(1, 1, new Buffer(0)).read();
+        const result =
+            new kinetic.NoOpResponsePDU(1, 1, Buffer.alloc(0)).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x2a\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x5f\x85\x18\x00\x1c\x3b\x1a\xa8\x3c\x9b\xfd\xfe\x32\x9f\x0f" +
             "\x13\xc4\xba\x1a\xcb\x3a\x0c\x0a\x04\x30\x01\x38\x1d\x1a\x04\x08" +
@@ -789,18 +792,18 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid PUT (option force missing)', (done) => {
-        const chunk = new Buffer("HI EVERYBODY");
+        const chunk = Buffer.from("HI EVERYBODY", 'utf8');
 
         const options = {
-            dbVersion: new Buffer('2'),
-            newVersion: new Buffer('3'),
+            dbVersion: Buffer.from('2', 'utf8'),
+            newVersion: Buffer.from('3', 'utf8'),
         };
 
         const k = new kinetic.PutPDU(1, 'string', chunk.length, options);
 
         const result = Buffer.concat([k.read(), chunk]);
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x41\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x49\x32\xeb\x78\xae\x2d\x7f\x48\x97\x7e\x76\x58\x15\x07\xd0" +
             "\xcf\xd5\xdc\x6d\x8c\x3a\x23\x0a\x0d\x08\x00\x18\xbd\x96\x89\x96" +
@@ -817,10 +820,10 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid PUT (force: true)', (done) => {
-        const chunk = new Buffer("HI EVERYBODY");
+        const chunk = Buffer.from("HI EVERYBODY", 'utf8');
         const options = {
-            dbVersion: new Buffer('2'),
-            newVersion: new Buffer('3'),
+            dbVersion: Buffer.from('2', 'utf8'),
+            newVersion: Buffer.from('3', 'utf8'),
             force: true,
         };
 
@@ -828,7 +831,7 @@ describe('kinetic.PDU encoding()', () => {
 
         const result = Buffer.concat([k.read(), chunk]);
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x43\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x33\x55\x10\x85\x03\x2d\xaf\x1c\xd3\x20\x40\xe0\x92\xfa\xb6" +
             "\xbe\xb2\x9b\x2c\xd1\x3a\x25\x0a\x0d\x08\x00\x18\xa1\xc3\x8e\x96" +
@@ -845,10 +848,10 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid PUT (force: false)', (done) => {
-        const chunk = new Buffer("HI EVERYBODY");
+        const chunk = Buffer.from("HI EVERYBODY", 'utf8');
         const options = {
-            dbVersion: new Buffer('2'),
-            newVersion: new Buffer('3'),
+            dbVersion: Buffer.from('2', 'utf8'),
+            newVersion: Buffer.from('3', 'utf8'),
             force: false,
         };
 
@@ -856,7 +859,7 @@ describe('kinetic.PDU encoding()', () => {
 
         const result = Buffer.concat([k.read(), chunk]);
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x43\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xff\x74\x10\xbb\xab\x1b\x56\xdf\x2c\xf6\xf6\x1f\x93\x38\xfa" +
             "\xf1\xc5\xef\xd6\x92\x3a\x25\x0a\x0d\x08\x00\x18\xbb\x97\x83\x96" +
@@ -873,9 +876,9 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid PUT_RESPONSE', (done) => {
-        const result = new kinetic.PutResponsePDU(1, 1, new Buffer(0)).read();
+        const result = new kinetic.PutResponsePDU(1, 1, Buffer.alloc(0)).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x2e\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x5f\xe8\x1f\xf4\xa6\xb1\xbd\x33\x3d\xc2\x00\xcc\xb0\xeb\xae" +
             "\x1d\x3f\xff\xc9\x02\x3a\x10\x0a\x04\x30\x01\x38\x03\x12\x02\x0a" +
@@ -887,8 +890,9 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid GET(options missing)', (done) => {
-        const result = new kinetic.GetPDU(0, new Buffer('qwer')).read();
-        const expected = new Buffer(
+        const result =
+            new kinetic.GetPDU(0, Buffer.from('qwer', 'utf8')).read();
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x37\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x71\x45\xcf\xea\xa2\x7c\x91\xc9\x90\xfb\x3e\x09\xa1\xe0\x92" +
             "\xd4\x5a\xb6\x17\xfd\x3a\x19\x0a\x0d\x08\x00\x18\x95\xd3\xeb\xc2" +
@@ -907,10 +911,10 @@ describe('kinetic.PDU encoding()', () => {
         const options = {
             metadataOnly: false,
         };
-        const result = new kinetic.GetPDU(0, new Buffer('qwer'), options)
-            .read();
+        const result =
+            new kinetic.GetPDU(0, Buffer.from('qwer', 'utf8'), options).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x39\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x87\x3a\xda\x04\xe1\x0b\x7d\x5e\x34\xd0\xc4\x3a\x89\x16\x0f" +
             "\x2c\xdf\xf0\x05\x52\x3a\x1b\x0a\x0d\x08\x00\x18\xfc\xc6\x98\x95" +
@@ -929,10 +933,10 @@ describe('kinetic.PDU encoding()', () => {
         const options = {
             metadataOnly: true,
         };
-        const result = new kinetic.GetPDU(0, new Buffer('qwer'), options)
-            .read();
+        const result =
+            new kinetic.GetPDU(0, Buffer.from('qwer', 'utf8'), options).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x39\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x22\xcd\x40\xbb\x1d\xc8\xa6\x34\xb3\x75\x27\xaa\x43\x5f\x1c" +
             "\xd3\xbc\x88\xb3\x0c\x3a\x1b\x0a\x0d\x08\x00\x18\x8f\xf0\x9f\x95" +
@@ -948,14 +952,14 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid GET_RESPONSE', (done) => {
-        const chunk = new Buffer("HI EVERYBODY");
+        const chunk = Buffer.from("HI EVERYBODY", 'utf8');
         const pdu = new kinetic.GetResponsePDU(
-                1, 1, new Buffer(0), new Buffer('qwer'), chunk.length,
-                new Buffer('1'));
+                1, 1, Buffer.alloc(0), Buffer.from('qwer', 'utf8'),
+                chunk.length, Buffer.from('1', 'utf8'));
 
         const result = Buffer.concat([pdu.read(), chunk]);
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x37\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xb2\x95\x7f\x58\x5e\x25\x0f\xda\x99\x0e\x84\x2f\xaa\x18\xf3" +
             "\x9c\x74\x7b\x7b\x40\x3a\x19\x0a\x04\x30\x01\x38\x01\x12\x0b\x0a" +
@@ -969,12 +973,12 @@ describe('kinetic.PDU encoding()', () => {
 
     it('should write valid DELETE (options missing)', (done) => {
         const options = {
-            dbVersion: new Buffer('1234'),
+            dbVersion: Buffer.from('1234', 'utf8'),
         };
 
         const result = new kinetic.DeletePDU(0, 'string', options).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x41\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x80\xd0\x16\xe1\x33\x2f\x52\xc3\xce\x47\x23\x50\xea\xd7\xb7" +
             "\x7d\x68\x02\xe5\xbe\x3a\x23\x0a\x0d\x08\x00\x18\xd8\xeb\xa1\x96" +
@@ -991,13 +995,13 @@ describe('kinetic.PDU encoding()', () => {
 
     it('should write valid DELETE (force: true)', (done) => {
         const options = {
-            dbVersion: new Buffer('1234'),
+            dbVersion: Buffer.from('1234', 'utf8'),
             force: true,
         };
 
         const result = new kinetic.DeletePDU(0, 'string', options).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x43\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xb4\x0a\x35\xbe\x7c\x79\xcc\x26\x82\xe5\x7c\x7a\x7f\x2e\x13" +
             "\x6d\xfb\xea\x51\x68\x3a\x25\x0a\x0d\x08\x00\x18\xcb\xb0\xaa\x96" +
@@ -1014,13 +1018,13 @@ describe('kinetic.PDU encoding()', () => {
 
     it('should write valid DELETE (force: false)', (done) => {
         const options = {
-            dbVersion: new Buffer('1234'),
+            dbVersion: Buffer.from('1234', 'utf8'),
             force: false,
         };
 
         const result = new kinetic.DeletePDU(0, 'string', options).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x43\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x2b\x4d\xbf\xd5\xe1\x7d\xd6\xa3\xff\x62\xc0\xae\x71\xa6\x79" +
             "\x95\xd6\xd6\x80\x52\x3a\x25\x0a\x0d\x08\x00\x18\x86\xf4\xae\x96" +
@@ -1036,10 +1040,10 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid DELETE_RESPONSE', (done) => {
-        const result = new kinetic.DeleteResponsePDU(1, 1, new Buffer(0))
+        const result = new kinetic.DeleteResponsePDU(1, 1, Buffer.alloc(0))
             .read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x2e\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xd2\x5e\x45\xf0\x20\xe3\xe4\xbf\xc2\xc1\x52\xe7\x67\xd0\xdf" +
             "\x65\x1b\x8e\x98\x9e\x3a\x10\x0a\x04\x30\x01\x38\x05\x12\x02\x0a" +
@@ -1053,7 +1057,7 @@ describe('kinetic.PDU encoding()', () => {
     it('should write valid FLUSH', (done) => {
         const result = new kinetic.FlushPDU(0).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x2f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x1b\xb1\x4c\x9d\x7c\x95\xe6\xbc\x7b\xb0\x0f\x65\x1d\x5e\x24" +
             "\xaa\x6a\xb5\xf0\x0a\x3a\x11\x0a\x0d\x08\x00\x18\xa8\x99\xee\xc3" +
@@ -1069,9 +1073,10 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid FLUSH_RESPONSE', (done) => {
-        const result = new kinetic.FlushResponsePDU(1, 1, new Buffer(0)).read();
+        const result =
+            new kinetic.FlushResponsePDU(1, 1, Buffer.alloc(0)).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x2a\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x11\x71\xfb\xeb\x34\x02\x4d\x6e\x22\xe7\xed\xd8\x1d\xab\x1d" +
             "\x87\xfe\x3b\x96\xb5\x3a\x0c\x0a\x04\x30\x01\x38\x1f\x1a\x04\x08" +
@@ -1086,7 +1091,7 @@ describe('kinetic.PDU encoding()', () => {
     it('should write valid GETLOG', (done) => {
         const result = new kinetic.GetLogPDU(0).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x3d\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xa6\x25\x09\x88\xca\x6f\xbf\x42\x80\xc7\x87\x77\x47\xc4\x78" +
             "\x97\x88\xd9\x2b\xd7\x3a\x1f\x0a\x0d\x08\x00\x18\xb1\xea\xa7\xc4" +
@@ -1152,7 +1157,7 @@ describe('kinetic.PDU encoding()', () => {
                 { messageType: 28,
                     count: 0,
                     bytes: 0, } ],
-            messages: new Buffer('Holla'),
+            messages: Buffer.from('Holla', 'utf8'),
             limits:
             { maxKeySize: 4096,
                 maxValueSize: 1048576,
@@ -1169,10 +1174,10 @@ describe('kinetic.PDU encoding()', () => {
                 maxBatchCountPerDevice: 5 },
             device: null
         };
-        const result = new kinetic.GetLogResponsePDU(1,  1, new Buffer(0),
+        const result = new kinetic.GetLogResponsePDU(1,  1, Buffer.alloc(0),
             logResponse).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x01\x4d\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x64\x67\x71\x29\xe3\x98\x7e\xf1\xd1\xc3\x3b\xfb\x65\x2b\x48" +
             "\xb4\x7c\x16\xf3\x10\x3a\xae\x02\x0a\x04\x30\x01\x38\x17\x12\x9f" +
@@ -1204,7 +1209,7 @@ describe('kinetic.PDU encoding()', () => {
     it('should write valid SetClusterVersion', (done) => {
         const result = new kinetic.SetClusterVersionPDU(1, 1234, 0).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x34\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x2c\xf2\x65\xde\x71\x74\x7c\x91\x23\x8a\xa8\xbd\x38\x6a\xab" +
             "\x40\x5d\x5e\x64\xd1\x3a\x16\x0a\x0d\x08\x00\x18\x98\xed\xdf\xd5" +
@@ -1219,9 +1224,10 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid SETUP_RESPONSE', (done) => {
-        const result = new kinetic.SetupResponsePDU(1, 1, new Buffer(0)).read();
+        const result =
+            new kinetic.SetupResponsePDU(1, 1, Buffer.alloc(0)).read();
 
-        const expected = new Buffer(
+        const expected = Buffer.from(
             "\x46\x00\x00\x00\x2a\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x21\xd9\xc6\x5c\x25\x51\x7f\x8d\xd1\xcc\xb9\x40\x17\xb8\xab" +
             "\xed\x11\xcb\x63\xe5\x3a\x0c\x0a\x04\x30\x01\x38\x15\x1a\x04\x08" +
@@ -1246,8 +1252,8 @@ describe('kinetic.PutPDU()', () => {
 
     it('should not accept non-string non-buffer key', (done) => {
         try {
-            const k = new kinetic.PutPDU(
-                1, 1, 77777, 12, new Buffer('2'), new Buffer('3'));
+            const k = new kinetic.PutPDU(1, 1, 77777, 12,
+                Buffer.from('2', 'utf8'), Buffer.from('3', 'utf8'));
             k;
             done(new Error("constructor accepted invalid key type"));
         } catch (e) {
@@ -1272,7 +1278,8 @@ describe('kinetic.PutPDU()', () => {
         try {
             const k = new kinetic.PutPDU(1, "string", 12,
                                          { dbVersion: { a: 1 },
-                                           newVersion: new Buffer('3') });
+                                           newVersion: Buffer.from('3', 'utf8'),
+                                         });
             k;
             done(new Error("constructor accepted object-typed key"));
         } catch (e) {
@@ -1296,7 +1303,7 @@ describe('kinetic.PutPDU()', () => {
     it('should not accept non-buffer newVersion', (done) => {
         try {
             const k = new kinetic.PutPDU(1, 'string', 12,
-                                         { dbVersion: new Buffer('2'),
+                                         { dbVersion: Buffer.from('2', 'utf8'),
                                            newVersion: { s: 'abc' } });
             k;
             done(new Error("constructor accepted string-typed key"));
@@ -1417,7 +1424,7 @@ describe('kinetic LONG number getters ', () => {
     it('should decode LONG ackSequence to number max:9223372036854776000',
         (done) => {
             const rawData = new kinetic.NoOpResponsePDU(9223372036854776000, 1,
-                new Buffer(0)).read();
+                Buffer.alloc(0)).read();
             const k = new kinetic.PDU(rawData);
 
             assert.strictEqual(k.getSequence(), 9223372036854776000);
