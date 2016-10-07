@@ -759,19 +759,19 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid NOOP', (done) => {
-        const result = new kinetic.NoOpPDU(123, {clusterVersion: 9876798})
+        const result = new kinetic.NoOpPDU(123)
             .read();
 
         const expected = Buffer.from(
-            "\x46\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x46\x00\x00\x00\x2f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xde\x57\x30\x36\x5a\x4a\x6f\xb7\x88\x02\x0b\xc4\x38\x0f\x76" +
-            "\xd9\xf1\xae\x57\x3b\x3a\x14\x0a\x10\x08\xbe\xea\xda\x04\x18\x82" +
-            "\xf9\xdb\x8f\x8d\x2a\x20\x7b\x38\x1e\x12\x00", "ascii");
+            "\xd9\xf1\xae\x57\x3b\x3a\x11\x0a\x0d\x08\x00\x18\xf7\xe6\x8d\xf9" +
+            "\xf9\x2a\x20\x7b\x38\x1e\x12\x00", "ascii");
 
-        // Ignore the timestamp bytes (17 -> 37 & 47 -> 51)
+        // Ignore the timestamp bytes (17 -> 37 & 44 -> 47)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
-        assert(result.slice(37, 47).equals(expected.slice(37, 47)));
-        assert(result.slice(52).equals(expected.slice(52)));
+        assert(result.slice(37, 44).equals(expected.slice(37, 44)));
+        assert(result.slice(47).equals(expected.slice(47)));
 
         done();
     });
@@ -1434,10 +1434,12 @@ describe('kinetic LONG number getters ', () => {
 
     it('should decode LONG clusterVersion to number max:9223372036854776000',
         (done) => {
-            const rawData = new kinetic.NoOpPDU(1,
-                {clusterVersion: 9223372036854776000}).read();
+            const pdu = new kinetic.InitPDU(
+                {}, { clusterVersion: 9223372036854776000 });
+            const rawData = new kinetic.NoOpPDU(1).read();
             const k = new kinetic.PDU(rawData);
 
+            assert.strictEqual(pdu.getClusterVersion(), 9223372036854776000);
             assert.strictEqual(k.getClusterVersion(), 9223372036854776000);
 
             done();
