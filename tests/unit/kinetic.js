@@ -1,4 +1,5 @@
 const assert = require('assert');
+const crypto = require('crypto');
 const net = require('net');
 const util = require('util');
 
@@ -799,17 +800,21 @@ describe('kinetic.PDU encoding()', () => {
             newVersion: Buffer.from('3', 'utf8'),
         };
 
-        const k = new kinetic.PutPDU(1, 'string', chunk.length, options);
+        const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update(chunk).digest();
+        const k = new kinetic.PutPDU(1, 'string', chunk.length, tag, options);
 
         const result = Buffer.concat([k.read(), chunk]);
 
         const expected = Buffer.from(
-            "\x46\x00\x00\x00\x41\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\x49\x32\xeb\x78\xae\x2d\x7f\x48\x97\x7e\x76\x58\x15\x07\xd0" +
-            "\xcf\xd5\xdc\x6d\x8c\x3a\x23\x0a\x0d\x08\x00\x18\xbd\x96\x89\x96" +
-            "\x91\x2a\x20\x01\x38\x04\x12\x12\x0a\x10\x12\x01\x33\x1a\x06\x73" +
-            "\x74\x72\x69\x6e\x67\x22\x01\x32\x48\x01\x48\x49\x20\x45\x56\x45" +
-            "\x52\x59\x42\x4f\x44\x59", "ascii");
+            "\x46\x00\x00\x00\x59\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x5d\x35\x79\x69\x3c\x74\x0e\x0f\x19\x5d\x0d\x07\x6f\x4a\x4f" +
+            "\x25\x13\x27\x37\x0b\x3a\x3b\x0a\x0d\x08\x00\x18\x02\x23\x36\x54" +
+            "\x79\x2a\x20\x01\x38\x04\x12\x2a\x0a\x28\x12\x01\x33\x1a\x06\x73" +
+            "\x74\x72\x69\x6e\x67\x22\x01\x32\x2a\x14\xbd\xf6\x8a\xf8\xba\x26" +
+            "\xa0\x34\x7f\xb9\xb3\xcc\x57\x21\xe2\x15\xd2\x8e\x3c\xc0\x30\x01" +
+            "\x48\x01\x48\x49\x20\x45\x56\x45\x52\x59\x42\x4f\x44\x59",
+            "ascii");
 
         // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
@@ -827,17 +832,21 @@ describe('kinetic.PDU encoding()', () => {
             force: true,
         };
 
-        const k = new kinetic.PutPDU(1, 'string', chunk.length, options);
+        const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update(chunk).digest();
+        const k = new kinetic.PutPDU(1, 'string', chunk.length, tag, options);
 
         const result = Buffer.concat([k.read(), chunk]);
 
         const expected = Buffer.from(
-            "\x46\x00\x00\x00\x43\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\x33\x55\x10\x85\x03\x2d\xaf\x1c\xd3\x20\x40\xe0\x92\xfa\xb6" +
-            "\xbe\xb2\x9b\x2c\xd1\x3a\x25\x0a\x0d\x08\x00\x18\xa1\xc3\x8e\x96" +
-            "\x91\x2a\x20\x01\x38\x04\x12\x14\x0a\x12\x12\x01\x33\x40\x01\x1a" +
-            "\x06\x73\x74\x72\x69\x6e\x67\x22\x01\x32\x48\x01\x48\x49\x20\x45" +
-            "\x56\x45\x52\x59\x42\x4f\x44\x59", "ascii");
+            "\x46\x00\x00\x00\x5b\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x5d\x35\x79\x69\x3c\x74\x0e\x0f\x19\x5d\x0d\x07\x6f\x4a\x4f" +
+            "\x25\x13\x27\x37\x0b\x3a\x3d\x0a\x0d\x08\x00\x18\x02\x23\x36\x54" +
+            "\x79\x2a\x20\x01\x38\x04\x12\x2c\x0a\x2a\x12\x01\x33\x40\x01\x1a" +
+            "\x06\x73\x74\x72\x69\x6e\x67\x22\x01\x32\x2a\x14\xbd\xf6\x8a\xf8" +
+            "\xba\x26\xa0\x34\x7f\xb9\xb3\xcc\x57\x21\xe2\x15\xd2\x8e\x3c\xc0" +
+            "\x30\x01\x48\x01\x48\x49\x20\x45\x56\x45\x52\x59\x42\x4f\x44\x59",
+            "ascii");
 
         // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
@@ -855,17 +864,21 @@ describe('kinetic.PDU encoding()', () => {
             force: false,
         };
 
-        const k = new kinetic.PutPDU(1, 'string', chunk.length, options);
+        const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update(chunk).digest();
+        const k = new kinetic.PutPDU(1, 'string', chunk.length, tag, options);
 
         const result = Buffer.concat([k.read(), chunk]);
 
         const expected = Buffer.from(
-            "\x46\x00\x00\x00\x43\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\xff\x74\x10\xbb\xab\x1b\x56\xdf\x2c\xf6\xf6\x1f\x93\x38\xfa" +
-            "\xf1\xc5\xef\xd6\x92\x3a\x25\x0a\x0d\x08\x00\x18\xbb\x97\x83\x96" +
-            "\x91\x2a\x20\x01\x38\x04\x12\x14\x0a\x12\x12\x01\x33\x40\x00\x1a" +
-            "\x06\x73\x74\x72\x69\x6e\x67\x22\x01\x32\x48\x01\x48\x49\x20\x45" +
-            "\x56\x45\x52\x59\x42\x4f\x44\x59", "ascii");
+            "\x46\x00\x00\x00\x5b\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x5d\x35\x79\x69\x3c\x74\x0e\x0f\x19\x5d\x0d\x07\x6f\x4a\x4f" +
+            "\x25\x13\x27\x37\x0b\x3a\x3d\x0a\x0d\x08\x00\x18\x02\x23\x36\x54" +
+            "\x79\x2a\x20\x01\x38\x04\x12\x2c\x0a\x2a\x12\x01\x33\x40\x00\x1a" +
+            "\x06\x73\x74\x72\x69\x6e\x67\x22\x01\x32\x2a\x14\xbd\xf6\x8a\xf8" +
+            "\xba\x26\xa0\x34\x7f\xb9\xb3\xcc\x57\x21\xe2\x15\xd2\x8e\x3c\xc0" +
+            "\x30\x01\x48\x01\x48\x49\x20\x45\x56\x45\x52\x59\x42\x4f\x44\x59",
+            "ascii");
 
         // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
@@ -953,18 +966,22 @@ describe('kinetic.PDU encoding()', () => {
 
     it('should write valid GET_RESPONSE', (done) => {
         const chunk = Buffer.from("HI EVERYBODY", 'utf8');
+        const tag = crypto.createHmac('sha1', 'asdfasdf')
+                  .update(chunk).digest();
         const pdu = new kinetic.GetResponsePDU(
-                1, 1, Buffer.alloc(0), Buffer.from('qwer', 'utf8'),
-                chunk.length, Buffer.from('1', 'utf8'));
+            1, 1, Buffer.alloc(0), Buffer.from('qwer', 'utf8'),
+            chunk.length, Buffer.from('1', 'utf8'), tag);
 
         const result = Buffer.concat([pdu.read(), chunk]);
 
         const expected = Buffer.from(
-            "\x46\x00\x00\x00\x37\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\xb2\x95\x7f\x58\x5e\x25\x0f\xda\x99\x0e\x84\x2f\xaa\x18\xf3" +
-            "\x9c\x74\x7b\x7b\x40\x3a\x19\x0a\x04\x30\x01\x38\x01\x12\x0b\x0a" +
-            "\x09\x1a\x04\x71\x77\x65\x72\x22\x01\x31\x1a\x04\x08\x01\x1a\x00" +
-            "\x48\x49\x20\x45\x56\x45\x52\x59\x42\x4f\x44\x59", "ascii");
+            "\x46\x00\x00\x00\x4f\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\xd2\x16\xd7\x6a\x9c\xee\xe4\x6f\x61\x69\x38\x07\x37\xf4\x4e" +
+            "\x29\x66\x7f\x37\x0d\x3a\x31\x0a\x04\x30\x01\x38\x01\x12\x23\x0a" +
+            "\x21\x1a\x04\x71\x77\x65\x72\x22\x01\x31\x2a\x14\xbd\xf6\x8a\xf8" +
+            "\xba\x26\xa0\x34\x7f\xb9\xb3\xcc\x57\x21\xe2\x15\xd2\x8e\x3c\xc0" +
+            "\x30\x01\x1a\x04\x08\x01\x1a\x00\x48\x49\x20\x45\x56\x45\x52\x59" +
+            "\x42\x4f\x44\x59", "ascii");
 
         assert(result.equals(expected));
 
@@ -1242,7 +1259,9 @@ describe('kinetic.PDU encoding()', () => {
 describe('kinetic.PutPDU()', () => {
     it('should accept string key', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, "string", 12);
+            const tag = crypto.createHmac('sha1', 'asdfasdf')
+                      .update('string').digest();
+            const k = new kinetic.PutPDU(1, "string", 12, tag);
             k;
             done();
         } catch (e) {
@@ -1266,7 +1285,10 @@ describe('kinetic.PutPDU()', () => {
 
     it('should accept numeric dbVersion', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, "string", 12, { dbVersion: 345 });
+            const tag = crypto.createHmac('sha1', 'asdfasdf')
+                      .update('string').digest();
+            const k = new kinetic.PutPDU(
+                1, "string", 12, tag, { dbVersion: 345 });
             k;
             done();
         } catch (e) {
@@ -1292,7 +1314,10 @@ describe('kinetic.PutPDU()', () => {
 
     it('should accept numeric newVersion', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, "string", 12, { newVersion: 346 });
+            const tag = crypto.createHmac('sha1', 'asdfasdf')
+                      .update('string').digest();
+            const k = new kinetic.PutPDU(
+                1, "string", 12, tag, { newVersion: 346 });
             k;
             done();
         } catch (e) {
@@ -1302,8 +1327,10 @@ describe('kinetic.PutPDU()', () => {
 
     it('should not accept non-buffer newVersion', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, 'string', 12,
-                                         { dbVersion: Buffer.from('2', 'utf8'),
+            const tag = crypto.createHmac('sha1', 'asdfasdf')
+                      .update('string').digest();
+            const k = new kinetic.PutPDU(1, 'string', 12, tag,
+                                         { dbVersion: Buffer.from('2'),
                                            newVersion: { s: 'abc' } });
             k;
             done(new Error("constructor accepted string-typed key"));
@@ -1317,7 +1344,9 @@ describe('kinetic.PutPDU()', () => {
 
     it('should set sequence', (done) => {
         try {
-            const k = new kinetic.PutPDU(345, "sequence", 12);
+            const tag = crypto.createHmac('sha1', 'asdfasdf')
+                      .update('string').digest();
+            const k = new kinetic.PutPDU(345, "sequence", 12, tag);
             assert.strictEqual(k.getSequence(), 345);
             done();
         } catch (e) {
