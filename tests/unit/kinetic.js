@@ -1,10 +1,13 @@
 const assert = require('assert');
+const crypto = require('crypto');
 const util = require('util');
 
 const winston = require('winston');
 
 const kinetic = require('../../index');
 
+const connectionID = (new Date).getTime();
+const clusterVersion = 0;
 const logger = new (winston.Logger)({
     transports: [new (winston.transports.Console)({ level: 'error' })]
 });
@@ -574,7 +577,7 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid NOOP', (done) => {
-        const result = new kinetic.NoOpPDU(123, {clusterVersion: 9876798})
+        const result = new kinetic.NoOpPDU(123, connectionID, 9876798)
             .read();
 
         const expected = Buffer.from(
@@ -614,17 +617,24 @@ describe('kinetic.PDU encoding()', () => {
             newVersion: Buffer.from('3', 'utf8'),
         };
 
-        const k = new kinetic.PutPDU(1, 'string', chunk.length, options);
+        const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update(chunk).digest();
+
+        const k = new kinetic.PutPDU(
+            1, connectionID, clusterVersion,
+            'string', chunk.length, tag, options);
 
         const result = Buffer.concat([k.read(), chunk]);
 
         const expected = Buffer.from(
-            "\x46\x00\x00\x00\x41\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\x49\x32\xeb\x78\xae\x2d\x7f\x48\x97\x7e\x76\x58\x15\x07\xd0" +
-            "\xcf\xd5\xdc\x6d\x8c\x3a\x23\x0a\x0d\x08\x00\x18\xbd\x96\x89\x96" +
-            "\x91\x2a\x20\x01\x38\x04\x12\x12\x0a\x10\x12\x01\x33\x1a\x06\x73" +
-            "\x74\x72\x69\x6e\x67\x22\x01\x32\x48\x01\x48\x49\x20\x45\x56\x45" +
-            "\x52\x59\x42\x4f\x44\x59", "ascii");
+            "\x46\x00\x00\x00\x59\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x5d\x35\x79\x69\x3c\x74\x0e\x0f\x19\x5d\x0d\x07\x6f\x4a\x4f" +
+            "\x25\x13\x27\x37\x0b\x3a\x3b\x0a\x0d\x08\x00\x18\x02\x23\x36\x54" +
+            "\x79\x2a\x20\x01\x38\x04\x12\x2a\x0a\x28\x12\x01\x33\x1a\x06\x73" +
+            "\x74\x72\x69\x6e\x67\x22\x01\x32\x2a\x14\xbd\xf6\x8a\xf8\xba\x26" +
+            "\xa0\x34\x7f\xb9\xb3\xcc\x57\x21\xe2\x15\xd2\x8e\x3c\xc0\x30\x01" +
+            "\x48\x02\x48\x49\x20\x45\x56\x45\x52\x59\x42\x4f\x44\x59",
+            "ascii");
 
         // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
@@ -642,17 +652,24 @@ describe('kinetic.PDU encoding()', () => {
             force: true,
         };
 
-        const k = new kinetic.PutPDU(1, 'string', chunk.length, options);
+        const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update(chunk).digest();
+
+        const k = new kinetic.PutPDU(
+            1, connectionID, clusterVersion,
+            'string', chunk.length, tag, options);
 
         const result = Buffer.concat([k.read(), chunk]);
 
         const expected = Buffer.from(
-            "\x46\x00\x00\x00\x43\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\x33\x55\x10\x85\x03\x2d\xaf\x1c\xd3\x20\x40\xe0\x92\xfa\xb6" +
-            "\xbe\xb2\x9b\x2c\xd1\x3a\x25\x0a\x0d\x08\x00\x18\xa1\xc3\x8e\x96" +
-            "\x91\x2a\x20\x01\x38\x04\x12\x14\x0a\x12\x12\x01\x33\x40\x01\x1a" +
-            "\x06\x73\x74\x72\x69\x6e\x67\x22\x01\x32\x48\x01\x48\x49\x20\x45" +
-            "\x56\x45\x52\x59\x42\x4f\x44\x59", "ascii");
+            "\x46\x00\x00\x00\x5b\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x5d\x35\x79\x69\x3c\x74\x0e\x0f\x19\x5d\x0d\x07\x6f\x4a\x4f" +
+            "\x25\x13\x27\x37\x0b\x3a\x3d\x0a\x0d\x08\x00\x18\x02\x23\x36\x54" +
+            "\x79\x2a\x20\x01\x38\x04\x12\x2c\x0a\x2a\x12\x01\x33\x40\x01\x1a" +
+            "\x06\x73\x74\x72\x69\x6e\x67\x22\x01\x32\x2a\x14\xbd\xf6\x8a\xf8" +
+            "\xba\x26\xa0\x34\x7f\xb9\xb3\xcc\x57\x21\xe2\x15\xd2\x8e\x3c\xc0" +
+            "\x30\x01\x48\x02\x48\x49\x20\x45\x56\x45\x52\x59\x42\x4f\x44\x59",
+            "ascii");
 
         // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
@@ -670,17 +687,24 @@ describe('kinetic.PDU encoding()', () => {
             force: false,
         };
 
-        const k = new kinetic.PutPDU(1, 'string', chunk.length, options);
+        const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update(chunk).digest();
+
+        const k = new kinetic.PutPDU(
+            1, connectionID, clusterVersion,
+            'string', chunk.length, tag, options);
 
         const result = Buffer.concat([k.read(), chunk]);
 
         const expected = Buffer.from(
-            "\x46\x00\x00\x00\x43\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\xff\x74\x10\xbb\xab\x1b\x56\xdf\x2c\xf6\xf6\x1f\x93\x38\xfa" +
-            "\xf1\xc5\xef\xd6\x92\x3a\x25\x0a\x0d\x08\x00\x18\xbb\x97\x83\x96" +
-            "\x91\x2a\x20\x01\x38\x04\x12\x14\x0a\x12\x12\x01\x33\x40\x00\x1a" +
-            "\x06\x73\x74\x72\x69\x6e\x67\x22\x01\x32\x48\x01\x48\x49\x20\x45" +
-            "\x56\x45\x52\x59\x42\x4f\x44\x59", "ascii");
+            "\x46\x00\x00\x00\x5b\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x5d\x35\x79\x69\x3c\x74\x0e\x0f\x19\x5d\x0d\x07\x6f\x4a\x4f" +
+            "\x25\x13\x27\x37\x0b\x3a\x3d\x0a\x0d\x08\x00\x18\x02\x23\x36\x54" +
+            "\x79\x2a\x20\x01\x38\x04\x12\x2c\x0a\x2a\x12\x01\x33\x40\x00\x1a" +
+            "\x06\x73\x74\x72\x69\x6e\x67\x22\x01\x32\x2a\x14\xbd\xf6\x8a\xf8" +
+            "\xba\x26\xa0\x34\x7f\xb9\xb3\xcc\x57\x21\xe2\x15\xd2\x8e\x3c\xc0" +
+            "\x30\x01\x48\x02\x48\x49\x20\x45\x56\x45\x52\x59\x42\x4f\x44\x59",
+            "ascii");
 
         // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
@@ -706,7 +730,9 @@ describe('kinetic.PDU encoding()', () => {
 
     it('should write valid GET(options missing)', (done) => {
         const result =
-            new kinetic.GetPDU(0, Buffer.from('qwer', 'utf8')).read();
+                  new kinetic.GetPDU(
+                      0, connectionID, clusterVersion,
+                      Buffer.from('qwer', 'utf8')).read();
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x37\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x71\x45\xcf\xea\xa2\x7c\x91\xc9\x90\xfb\x3e\x09\xa1\xe0\x92" +
@@ -727,7 +753,9 @@ describe('kinetic.PDU encoding()', () => {
             metadataOnly: false,
         };
         const result =
-            new kinetic.GetPDU(0, Buffer.from('qwer', 'utf8'), options).read();
+                  new kinetic.GetPDU(
+                      0, connectionID, clusterVersion,
+                      Buffer.from('qwer', 'utf8'), options).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x39\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -749,7 +777,9 @@ describe('kinetic.PDU encoding()', () => {
             metadataOnly: true,
         };
         const result =
-            new kinetic.GetPDU(0, Buffer.from('qwer', 'utf8'), options).read();
+                  new kinetic.GetPDU(
+                      0, connectionID, clusterVersion,
+                      Buffer.from('qwer', 'utf8'), options).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x39\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -768,18 +798,25 @@ describe('kinetic.PDU encoding()', () => {
 
     it('should write valid GET_RESPONSE', (done) => {
         const chunk = Buffer.from("HI EVERYBODY", 'utf8');
+
+        const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update(chunk).digest();
+
         const pdu = new kinetic.GetResponsePDU(
                 1, 1, Buffer.alloc(0), Buffer.from('qwer', 'utf8'),
-                chunk.length, Buffer.from('1', 'utf8'));
+            chunk.length, Buffer.from('1', 'utf8'), tag);
 
         const result = Buffer.concat([pdu.read(), chunk]);
 
+
         const expected = Buffer.from(
-            "\x46\x00\x00\x00\x37\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
-            "\x14\xb2\x95\x7f\x58\x5e\x25\x0f\xda\x99\x0e\x84\x2f\xaa\x18\xf3" +
-            "\x9c\x74\x7b\x7b\x40\x3a\x19\x0a\x04\x30\x01\x38\x01\x12\x0b\x0a" +
-            "\x09\x1a\x04\x71\x77\x65\x72\x22\x01\x31\x1a\x04\x08\x01\x1a\x00" +
-            "\x48\x49\x20\x45\x56\x45\x52\x59\x42\x4f\x44\x59", "ascii");
+            "\x46\x00\x00\x00\x4f\x00\x00\x00\x0c\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\xd2\x16\xd7\x6a\x9c\xee\xe4\x6f\x61\x69\x38\x07\x37\xf4\x4e" +
+            "\x29\x66\x7f\x37\x0d\x3a\x31\x0a\x04\x30\x01\x38\x01\x12\x23\x0a" +
+            "\x21\x1a\x04\x71\x77\x65\x72\x22\x01\x31\x2a\x14\xbd\xf6\x8a\xf8" +
+            "\xba\x26\xa0\x34\x7f\xb9\xb3\xcc\x57\x21\xe2\x15\xd2\x8e\x3c\xc0" +
+            "\x30\x01\x1a\x04\x08\x01\x1a\x00\x48\x49\x20\x45\x56\x45\x52\x59" +
+            "\x42\x4f\x44\x59", "ascii");
 
         assert(result.equals(expected));
 
@@ -791,14 +828,15 @@ describe('kinetic.PDU encoding()', () => {
             dbVersion: Buffer.from('1234', 'utf8'),
         };
 
-        const result = new kinetic.DeletePDU(0, 'string', options).read();
+        const result = new kinetic.DeletePDU(
+            0, connectionID, clusterVersion, 'string', options).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x41\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x80\xd0\x16\xe1\x33\x2f\x52\xc3\xce\x47\x23\x50\xea\xd7\xb7" +
             "\x7d\x68\x02\xe5\xbe\x3a\x23\x0a\x0d\x08\x00\x18\xd8\xeb\xa1\x96" +
             "\x91\x2a\x20\x00\x38\x06\x12\x12\x0a\x10\x1a\x06\x73\x74\x72\x69" +
-            "\x6e\x67\x22\x04\x31\x32\x33\x34\x48\x01", "ascii");
+            "\x6e\x67\x22\x04\x31\x32\x33\x34\x48\x02", "ascii");
 
         // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
@@ -814,14 +852,15 @@ describe('kinetic.PDU encoding()', () => {
             force: true,
         };
 
-        const result = new kinetic.DeletePDU(0, 'string', options).read();
+        const result = new kinetic.DeletePDU(
+            0, connectionID, clusterVersion, 'string', options).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x43\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\xb4\x0a\x35\xbe\x7c\x79\xcc\x26\x82\xe5\x7c\x7a\x7f\x2e\x13" +
             "\x6d\xfb\xea\x51\x68\x3a\x25\x0a\x0d\x08\x00\x18\xcb\xb0\xaa\x96" +
             "\x91\x2a\x20\x00\x38\x06\x12\x14\x0a\x12\x40\x01\x1a\x06\x73\x74" +
-            "\x72\x69\x6e\x67\x22\x04\x31\x32\x33\x34\x48\x01", "ascii");
+            "\x72\x69\x6e\x67\x22\x04\x31\x32\x33\x34\x48\x02", "ascii");
 
         // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
@@ -837,14 +876,15 @@ describe('kinetic.PDU encoding()', () => {
             force: false,
         };
 
-        const result = new kinetic.DeletePDU(0, 'string', options).read();
+        const result = new kinetic.DeletePDU(
+            0, connectionID, clusterVersion, 'string', options).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x43\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
             "\x14\x2b\x4d\xbf\xd5\xe1\x7d\xd6\xa3\xff\x62\xc0\xae\x71\xa6\x79" +
             "\x95\xd6\xd6\x80\x52\x3a\x25\x0a\x0d\x08\x00\x18\x86\xf4\xae\x96" +
             "\x91\x2a\x20\x00\x38\x06\x12\x14\x0a\x12\x40\x00\x1a\x06\x73\x74" +
-            "\x72\x69\x6e\x67\x22\x04\x31\x32\x33\x34\x48\x01", "ascii");
+            "\x72\x69\x6e\x67\x22\x04\x31\x32\x33\x34\x48\x02", "ascii");
 
         // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
@@ -870,7 +910,8 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid FLUSH', (done) => {
-        const result = new kinetic.FlushPDU(0).read();
+        const result = new kinetic.FlushPDU(
+            0, connectionID, clusterVersion).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x2f\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -904,7 +945,8 @@ describe('kinetic.PDU encoding()', () => {
 
 
     it('should write valid GETLOG', (done) => {
-        const result = new kinetic.GetLogPDU(0).read();
+        const result = new kinetic.GetLogPDU(
+            0, connectionID, clusterVersion).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x3d\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -1022,7 +1064,8 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid SetClusterVersion', (done) => {
-        const result = new kinetic.SetClusterVersionPDU(1, 1234, 0).read();
+        const result = new kinetic.SetClusterVersionPDU(
+            1, connectionID, 1234, 0).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x34\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -1057,7 +1100,10 @@ describe('kinetic.PDU encoding()', () => {
 describe('kinetic.PutPDU()', () => {
     it('should accept string key', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, "string", 12);
+            const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update('HelloWorld').digest();
+            const k = new kinetic.PutPDU(
+                1, connectionID, clusterVersion, "string", 12, tag);
             k;
             done();
         } catch (e) {
@@ -1067,8 +1113,10 @@ describe('kinetic.PutPDU()', () => {
 
     it('should not accept non-string non-buffer key', (done) => {
         try {
+            const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update('HelloWorld').digest();
             const k = new kinetic.PutPDU(1, 1, 77777, 12,
-                Buffer.from('2', 'utf8'), Buffer.from('3', 'utf8'));
+                Buffer.from('2', 'utf8'), Buffer.from('3', 'utf8'), tag);
             k;
             done(new Error("constructor accepted invalid key type"));
         } catch (e) {
@@ -1081,7 +1129,11 @@ describe('kinetic.PutPDU()', () => {
 
     it('should accept numeric dbVersion', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, "string", 12, { dbVersion: 345 });
+            const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update('HelloWorld').digest();
+            const k = new kinetic.PutPDU(
+                1, connectionID, clusterVersion,
+                "string", 12, tag, { dbVersion: 345 });
             k;
             done();
         } catch (e) {
@@ -1091,10 +1143,13 @@ describe('kinetic.PutPDU()', () => {
 
     it('should not accept badly-typed dbVersion', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, "string", 12,
-                                         { dbVersion: { a: 1 },
-                                           newVersion: Buffer.from('3', 'utf8'),
-                                         });
+            const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update('HelloWorld').digest();
+            const k = new kinetic.PutPDU(
+                1, connectionID, clusterVersion, "string", 12, tag,
+                { dbVersion: { a: 1 },
+                  newVersion: Buffer.from('3', 'utf8'),
+                });
             k;
             done(new Error("constructor accepted object-typed key"));
         } catch (e) {
@@ -1107,7 +1162,11 @@ describe('kinetic.PutPDU()', () => {
 
     it('should accept numeric newVersion', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, "string", 12, { newVersion: 346 });
+            const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update('HelloWorld').digest();
+            const k = new kinetic.PutPDU(
+                1, connectionID, clusterVersion,
+                "string", 12, tag, { newVersion: 346 });
             k;
             done();
         } catch (e) {
@@ -1117,9 +1176,13 @@ describe('kinetic.PutPDU()', () => {
 
     it('should not accept non-buffer newVersion', (done) => {
         try {
-            const k = new kinetic.PutPDU(1, 'string', 12,
-                                         { dbVersion: Buffer.from('2', 'utf8'),
-                                           newVersion: { s: 'abc' } });
+            const tag = crypto
+                  .createHmac('sha1', 'asdfasdf').update('HelloWorld').digest();
+            const k = new kinetic.PutPDU(
+                1, connectionID, clusterVersion, 'string', 12, tag,
+                { dbVersion: Buffer.from('2', 'utf8'),
+                  newVersion: { s: 'abc' }
+                });
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
@@ -1132,7 +1195,10 @@ describe('kinetic.PutPDU()', () => {
 
     it('should set sequence', (done) => {
         try {
-            const k = new kinetic.PutPDU(345, "sequence", 12);
+            const tag = crypto.createHmac('sha1', 'asdfasdf')
+                      .update('HelloWorld').digest();
+            const k = new kinetic.PutPDU(
+                345, connectionID, clusterVersion, "sequence", 12, tag);
             assert.strictEqual(k.getSequence(), 345);
             done();
         } catch (e) {
@@ -1144,7 +1210,8 @@ describe('kinetic.PutPDU()', () => {
 describe('kinetic.GetPDU()', () => {
     it('should accept string key', (done) => {
         try {
-            const k = new kinetic.GetPDU(1, "string");
+            const k = new kinetic.GetPDU(
+                1, connectionID, clusterVersion, "string");
             k;
             done();
         } catch (e) {
@@ -1154,7 +1221,7 @@ describe('kinetic.GetPDU()', () => {
 
     it('should not accept non-string non-buffer key', (done) => {
         try {
-            const k = new kinetic.GetPDU(1, 2);
+            const k = new kinetic.GetPDU(1, connectionID, clusterVersion, 2);
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
@@ -1167,7 +1234,8 @@ describe('kinetic.GetPDU()', () => {
 
     it('should set sequence', (done) => {
         try {
-            const k = new kinetic.GetPDU(987, "sequence");
+            const k = new kinetic.GetPDU(
+                987, connectionID, clusterVersion, "sequence");
             assert.strictEqual(k.getSequence(), 987);
             done();
         } catch (e) {
@@ -1179,7 +1247,8 @@ describe('kinetic.GetPDU()', () => {
 describe('kinetic.DeletePDU()', () => {
     it('should accept string key', (done) => {
         try {
-            const k = new kinetic.DeletePDU(1, "string");
+            const k = new kinetic.DeletePDU(
+                1, connectionID, clusterVersion, "string");
             k;
             done();
         } catch (e) {
@@ -1189,7 +1258,8 @@ describe('kinetic.DeletePDU()', () => {
 
     it('should not accept non-string non-buffer key', (done) => {
         try {
-            const k = new kinetic.DeletePDU(1, 777777);
+            const k = new kinetic.DeletePDU(
+                1, connectionID, clusterVersion, 777777);
             k;
             done(new Error("constructor accepted string-typed key"));
         } catch (e) {
@@ -1202,7 +1272,8 @@ describe('kinetic.DeletePDU()', () => {
 
     it('should accept numeric dbVersion', (done) => {
         try {
-            const k = new kinetic.DeletePDU(1, "string", { dbVersion: 345 });
+            const k = new kinetic.DeletePDU(
+                1, connectionID, clusterVersion, "string", { dbVersion: 345 });
             k;
             done();
         } catch (e) {
@@ -1212,8 +1283,9 @@ describe('kinetic.DeletePDU()', () => {
 
     it('should not accept badly-typed dbVersion', (done) => {
         try {
-            const k = new kinetic.DeletePDU(1, "string",
-                                            { dbVersion: { a: 1 } });
+            const k = new kinetic.DeletePDU(
+                1, connectionID, clusterVersion, "string",
+                { dbVersion: { a: 1 } });
             k;
             done(new Error("constructor accepted object-typed key"));
         } catch (e) {
@@ -1228,7 +1300,8 @@ describe('kinetic.DeletePDU()', () => {
 describe('kinetic LONG number getters ', () => {
     it('should decode Long sequence to number max:922337203685477600',
         (done) => {
-            const rawData = new kinetic.NoOpPDU(9223372036854776001).read();
+            const rawData = new kinetic.NoOpPDU(
+                9223372036854776001, connectionID, clusterVersion).read();
             const k = new kinetic.PDU(rawData);
 
             assert.strictEqual(k.getSequence(), 9223372036854776000);
@@ -1249,8 +1322,8 @@ describe('kinetic LONG number getters ', () => {
 
     it('should decode LONG clusterVersion to number max:9223372036854776000',
         (done) => {
-            const rawData = new kinetic.NoOpPDU(1,
-                {clusterVersion: 9223372036854776000}).read();
+            const rawData = new kinetic.NoOpPDU(
+                1, connectionID, 9223372036854776000).read();
             const k = new kinetic.PDU(rawData);
 
             assert.strictEqual(k.getClusterVersion(), 9223372036854776000);
