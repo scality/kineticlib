@@ -62,26 +62,6 @@ if (type === kinetic.ops.GET)
 
 Asynchronously decode a PDU from a stream (e.g. a socket):
 
-Note: the socket must be paused (in practice, use the `pauseOnConnect` option
-when creating a `net.Server`).
-
-```js
-kinetic.streamToPDU(socket, (err, pdu) => {
-    if (err) {
-        handleErr(err);
-    } else {
-        if (pdu.getMessageType() === kinetic.ops.GET_RESPONSE) {
-            socket.resume();  // set the socket back in non-paused mode
-            socket.on('data', (chunk) => {
-                // ...
-            });
-        }
-    }
-});
-
-process.stdout.write("receiving bytes...\n");
-```
-
 Handle a decoding error:
 
 ```js
@@ -96,4 +76,47 @@ try {
         process.stdout.write("Message is corrupted.\n");
     // ...
 }
+```
+
+Receive a response from kinetic:
+
+```js
+const header = socket.sock.read(HEADER_SZ);
+const protobufSize = header.readInt32BE(1);
+const rawData = socket.sock.read(protobufSize);
+const pdu = new kinetic.PDU(Buffer.concat([header, rawData]));
+const statusCode = pdu.getStatusCode();
+const connectionInfos = {};
+let chunkSize = 0;
+let chunk = Buffer.from(0);
+
+switch (pdu.getMessageType()) {
+//Initial pdu received from the kinetic drive with infos
+case null:
+    //These infos are needed for the nexts request
+    connectionInfos.connectionID = pdu.getConnectionId();
+    connectionInfos.clusterVersion = pdu.getClusterVersion();
+    break;
+case kinetic.ops.PUT_RESPONSE:
+    if (statusCode !== kinetic.errors.SUCCESS) {
+        return callback(pdu.getErrorMessage());
+    }
+    return callback(null, pdu);
+    break;
+case kinetic.ops.DELETE_RESPONSE:
+    if (statusCode !== kinetic.errors.SUCCESS) {
+        return callback(pdu.getErrorMessage());
+    }
+    return callback(null, pdu);
+    break;
+case kinetic.ops.GET_RESPONSE:
+    if (statusCode !== kinetic.errors.SUCCESS) {
+        return callback(pdu.getErrorMessage());
+    }
+    chunkSize = pdu.getChunkSize();
+    chunk = socket.sock.read(chunkSize);
+    return callback(null, pdu, chunk);
+    break;
+default:
+    break;
 ```
