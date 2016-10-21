@@ -642,7 +642,7 @@ describe('kinetic.PDU encoding()', () => {
             device: null
         };
 
-        const result = new kinetic.InitPDU(logs).read();
+        const result = new kinetic.InitPDU(logs, 0).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x01\x5a\x00\x00\x00\x00\x20\x03\x3a\xd5\x02\x0a\x09" +
@@ -883,13 +883,10 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid GET (metadataOnly: false)', (done) => {
-        const options = {
-            metadataOnly: false,
-        };
         const result =
                   new kinetic.GetPDU(
                       0, connectionID, clusterVersion,
-                      Buffer.from('qwer', 'utf8'), options).read();
+                      Buffer.from('qwer', 'utf8'), false).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x34\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
@@ -902,13 +899,10 @@ describe('kinetic.PDU encoding()', () => {
     });
 
     it('should write valid GET (metadataOnly : true)', (done) => {
-        const options = {
-            metadataOnly: true,
-        };
         const result =
                   new kinetic.GetPDU(
                       0, connectionID, clusterVersion,
-                      Buffer.from('qwer', 'utf8'), options).read();
+                      Buffer.from('qwer', 'utf8'), true).read();
 
         const expected = Buffer.from(
             "\x46\x00\x00\x00\x34\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
