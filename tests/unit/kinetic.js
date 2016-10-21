@@ -269,11 +269,26 @@ describe('kinetic.PDU decoding()', () => {
         checkDecoding(rawData, (pdu) => {
             assert.deepStrictEqual(pdu.getCommandSize(), 22);
             assert.deepStrictEqual(pdu.getChunkSize(), 0);
-            assert.deepStrictEqual(pdu.getMessageType(),
-                kinetic.ops.SET_CLUSTER_VERSION);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.SETUP);
             assert.deepStrictEqual(pdu.getClusterVersion(), 0);
             assert.deepStrictEqual(pdu.getNewClusterVersion(), 1234);
             assert.deepStrictEqual(pdu.getSequence(), 0);
+        }, done);
+    });
+
+    it('should parse valid SetClusterVersion', (done) => {
+        const rawData = Buffer.from(
+            "\x46\x00\x00\x00\x2e\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x52\x4c\x76\xdf\xbc\x54\x34\x5a\xb8\x0e\x6b\xdf\x13\x83\x4e" +
+            "\x4f\xaf\x7a\xe3\x60\x3a\x10\x0a\x08\x08\x7b\x18\x00\x20\x04\x38" +
+            "\x16\x12\x04\x1a\x02\x28\x01", "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepStrictEqual(pdu.getCommandSize(), 16);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.SETUP);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 123);
+            assert.deepStrictEqual(pdu.getSequence(), 4);
         }, done);
     });
 
@@ -1077,6 +1092,21 @@ describe('kinetic.PDU encoding()', () => {
         assert(result.slice(0, 17).equals(expected.slice(0, 17)));
         assert(result.slice(37, 44).equals(expected.slice(37, 44)));
         assert(result.slice(49).equals(expected.slice(49)));
+
+        done();
+    });
+
+    it('should write valid FirmwareDownload', (done) => {
+        const result = new kinetic.FirmwareDownloadPDU(4, 0, 123).read();
+
+        const expected = Buffer.from(
+            "\x46\x00\x00\x00\x2e\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x52\x4c\x76\xdf\xbc\x54\x34\x5a\xb8\x0e\x6b\xdf\x13\x83\x4e" +
+            "\x4f\xaf\x7a\xe3\x60\x3a\x10\x0a\x08\x08\x7b\x18\x00\x20\x04\x38" +
+            "\x16\x12\x04\x1a\x02\x28\x01", "ascii");
+
+        // Ignore the timestamp bytes (17 -> 37 & 44 -> 48)
+        assert(result.equals(expected));
 
         done();
     });
