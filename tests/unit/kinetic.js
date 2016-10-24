@@ -356,6 +356,163 @@ describe('kinetic.PDU decoding()', () => {
         }, done);
     });
 
+    it('should parse valid GETVERSION', (done) => {
+        const rawData = Buffer.from(
+            "\x46\x00\x00\x00\x31\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x08\xe5\x55\x4c\x8b\x77\x26\xd8\x50\x3a\x63\x44\xc6\x43\x42" +
+            "\xfb\xfb\x81\xe0\x8d\x3a\x13\x0a\x08\x08\x7b\x18\x00\x20\x04\x38" +
+            "\x10\x12\x07\x0a\x05\x1a\x03\x6b\x65\x79", "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepStrictEqual(pdu.getCommandSize(), 19);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(
+                pdu.getMessageType(), kinetic.ops.GETVERSION);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 123);
+            assert.deepStrictEqual(pdu.getSequence(), 4);
+        }, done);
+    });
+
+    it('should parse valid GETVERSION_RESPONSE', (done) => {
+        const rawData = Buffer.from(
+            "\x46\x00\x00\x00\x34\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x3a\x16\x29\x32\x99\xce\x82\xbe\x06\x81\xad\xa2\x2e\x00\x04" +
+            "\x27\x53\xd2\x8f\x73\x3a\x16\x0a\x04\x30\x04\x38\x0f\x12\x08\x0a" +
+            "\x06\x22\x04\x00\x00\x00\x00\x1a\x04\x08\x01\x1a\x00",  "ascii");
+
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepStrictEqual(pdu.getCommandSize(), 22);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.GETVERSION_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 4);
+        }, done);
+    });
+
+    it('should parse valid GETNEXT', (done) => {
+        const rawData = Buffer.from(
+            "\x46\x00\x00\x00\x31\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\xa0\x85\xae\xf0\xfa\x8b\x96\xf6\x1d\x07\x13\xe1\x84\x64\xe2" +
+            "\x36\x7e\xfc\x9b\x30\x3a\x13\x0a\x08\x08\x7b\x18\x00\x20\x04\x38" +
+            "\x08\x12\x07\x0a\x05\x1a\x03\x6b\x65\x79", "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepStrictEqual(pdu.getCommandSize(), 19);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(), kinetic.ops.GETNEXT);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 123);
+            assert.deepStrictEqual(pdu.getSequence(), 4);
+        }, done);
+    });
+
+    it('should parse valid GETNEXT_RESPONSE', (done) => {
+        const rawData = Buffer.from(
+            "\x46\x00\x00\x00\x55\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x41\x9c\x86\x4e\x3c\x8f\xbb\xe8\x09\x46\xc7\x52\xd4\x28\x8d" +
+            "\x9c\xb6\xa0\x02\xdf\x3a\x37\x0a\x04\x30\x04\x38\x07\x12\x29\x0a" +
+            "\x27\x1a\x07\x6b\x65\x79\x4e\x65\x78\x74\x22\x04\x00\x00\x00\x00" +
+            "\x2a\x14\x60\x9c\x94\x85\xfc\x33\x0a\x44\x8b\x5c\xf0\x62\x2d\xab" +
+            "\xc7\xe7\x54\x29\x82\xb6\x30\x01\x1a\x04\x08\x01\x1a\x00",
+            "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepStrictEqual(pdu.getCommandSize(), 55);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.GETNEXT_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 4);
+        }, done);
+    });
+
+    it('should parse valid GETPREVIOUS', (done) => {
+        const rawData = Buffer.from(
+            "\x46\x00\x00\x00\x31\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\xca\x82\x36\x07\xc9\x1e\x38\x63\x79\x09\x68\x93\x40\x00\x59" +
+            "\xac\x23\x0f\x2a\x7a\x3a\x13\x0a\x08\x08\x7b\x18\x00\x20\x04\x38" +
+            "\x0a\x12\x07\x0a\x05\x1a\x03\x6b\x65\x79", "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepStrictEqual(pdu.getCommandSize(), 19);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(
+                pdu.getMessageType(), kinetic.ops.GETPREVIOUS);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 123);
+            assert.deepStrictEqual(pdu.getSequence(), 4);
+        }, done);
+    });
+
+    it('should parse valid GETPREVIOUS_RESPONSE', (done) => {
+        const rawData = Buffer.from(
+            "\x46\x00\x00\x00\x59\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x81\xe6\x1f\x92\xd0\x21\xf5\xbb\x75\x21\x4f\x41\xcb\x0b\x06" +
+            "\x2a\x61\x63\x8b\x45\x3a\x3b\x0a\x04\x30\x04\x38\x09\x12\x2d\x0a" +
+            "\x2b\x1a\x0b\x6b\x65\x79\x50\x72\x65\x76\x69\x6f\x75\x73\x22\x04" +
+            "\x00\x00\x00\x00\x2a\x14\x60\x9c\x94\x85\xfc\x33\x0a\x44\x8b\x5c" +
+            "\xf0\x62\x2d\xab\xc7\xe7\x54\x29\x82\xb6\x30\x01\x1a\x04\x08\x01" +
+            "\x1a\x00", "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepStrictEqual(pdu.getCommandSize(), 59);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.GETPREVIOUS_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 4);
+        }, done);
+    });
+
+    it('should parse valid GETKEYRANGE', (done) => {
+        const rawData = Buffer.from(
+            "\x46\x00\x00\x00\x3a\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x3f\x6a\x2d\x9a\x0e\x02\xec\x1b\x61\x6e\xac\x71\xa9\xbc\x20" +
+            "\xb2\xd1\x51\x68\x3d\x3a\x1c\x0a\x08\x08\x00\x18\x01\x20\x01\x38" +
+            "\x0c\x12\x10\x12\x0e\x0a\x01\x31\x12\x01\x35\x18\x00\x20\x00\x28" +
+            "\x04\x30\x00", "ascii");
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepStrictEqual(pdu.getCommandSize(), 28);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(
+                pdu.getMessageType(), kinetic.ops.GETKEYRANGE);
+            assert.deepStrictEqual(pdu.getClusterVersion(), 0);
+            assert.deepStrictEqual(pdu.getSequence(), 1);
+        }, done);
+    });
+
+    it('should parse valid GETKEYRANGE_RESPONSE', (done) => {
+        const rawData = Buffer.from(
+            "\x46\x00\x00\x00\x4d\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
+            "\x14\x10\x30\x8b\x7d\x34\x0e\xc4\x84\x6e\xd7\x25\x19\xee\xb8\xc5" +
+            "\x4f\x1a\xb6\xee\xf4\x3a\x2f\x0a\x04\x30\x04\x38\x0b\x12\x21\x12" +
+            "\x1f\x42\x01\x31\x42\x01\x32\x42\x01\x33\x42\x01\x34\x42\x01\x35" +
+            "\x42\x01\x36\x42\x01\x37\x42\x01\x38\x42\x01\x39\x42\x02\x31\x30" +
+            "\x1a\x04\x08\x01\x1a\x00", "ascii");
+
+        const keys = [Buffer.from('1'),
+                      Buffer.from('2'),
+                      Buffer.from('3'),
+                      Buffer.from('4'),
+                      Buffer.from('5'),
+                      Buffer.from('6'),
+                      Buffer.from('7'),
+                      Buffer.from('8'),
+                      Buffer.from('9'),
+                      Buffer.from('10')];
+
+        checkDecoding(rawData, (pdu) => {
+            assert.deepStrictEqual(pdu.getCommandSize(), 47);
+            assert.deepStrictEqual(pdu.getStatusCode(), kinetic.errors.SUCCESS);
+            assert.deepStrictEqual(pdu.getChunkSize(), 0);
+            assert.deepStrictEqual(pdu.getMessageType(),
+                kinetic.ops.GETKEYRANGE_RESPONSE);
+            assert.deepStrictEqual(pdu.getSequence(), 4);
+            assert.deepStrictEqual(pdu.getKeyRange(), keys);
+        }, done);
+    });
+
     it('should detect PDU with invalid version', (done) => {
         const rawData = Buffer.from(
             "\x47\x00\x00\x00\x32\x00\x00\x00\x00\x20\x01\x2a\x18\x08\x01\x12" +
