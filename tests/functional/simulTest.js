@@ -10,18 +10,15 @@ import kinetic from '../../index';
 const HOST = '127.0.0.1';
 const PORT = 8123;
 const chunk = Buffer.from('CHUNK');
-const chunk2 = Buffer.from('CHUNK2');
 const key = Buffer.from('key');
 const startKey = Buffer.from('key');
 const endKey = Buffer.from('key5');
 const maxRet = 100;
-const batchId = 1234;
 
 let sequence = 0;
 let connectionID = 0;
 let clusterVersion = 0;
-let newVersion = Buffer.from('1');
-let tagBatch = false;
+const newVersion = Buffer.from('1');
 
 const logger = new (winston.Logger)({
     transports: [new (winston.transports.Console)({ level: 'error' })]
@@ -50,13 +47,13 @@ const requestsArr = [
     ['setClusterVersionTo0', 'SETUP_RESPONSE'],
 ];
 
-function requestsLauncher(request, client, optionsA, done) {
+function requestsLauncher(request, client, optionsA) {
     let pdu;
     let tag;
 
     const options = optionsA || {};
 
-    switch(request) {
+    switch (request) {
     case 'noop':
         pdu = new kinetic.NoOpPDU(sequence, connectionID, clusterVersion);
         break;
@@ -113,7 +110,7 @@ function requestsLauncher(request, client, optionsA, done) {
         break;
     }
 
-        client.write(pdu.read());
+    client.write(pdu.read());
     if (request === 'put') {
         client.write(chunk);
     }
