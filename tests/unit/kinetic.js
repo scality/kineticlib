@@ -646,7 +646,7 @@ describe('kinetic.PDU encoding()', () => {
 
         const expected = Buffer.from(
             "\x46\x00\x00\x01\x5a\x00\x00\x00\x00\x20\x03\x3a\xd5\x02\x0a\x09" +
-            "\x08\x00\x18\xc2\xea\x9d\xe4\x91\x2b\x12\xc3\x02\x32\xc0\x02\x2a" +
+            "\x08\x00\x18\xe3\xe9\x8c\xae\x80\x2b\x12\xc3\x02\x32\xc0\x02\x2a" +
             "\x86\x02\x2a\x07\x53\x65\x61\x67\x61\x74\x65\x32\x09\x53\x69\x6d" +
             "\x75\x6c\x61\x74\x6f\x72\x3a\x0a\x71\x77\x65\x72\x74\x79\x31\x32" +
             "\x33\x34\x72\x07\x6b\x69\x6e\x65\x74\x69\x63\x42\x10\x30\x2e\x38" +
@@ -669,9 +669,9 @@ describe('kinetic.PDU encoding()', () => {
             "\xff\x0f\x48\xc8\x01\x50\xff\xff\xff\xff\x0f\x60\x0f\x68\x05\x1a" +
             "\x02\x08\x01", "ascii");
 
-        // Ignore the timestamp bytes (17 -> 24)
-        assert(result.slice(0, 17).equals(expected.slice(0, 17)));
-        assert(result.slice(24).equals(expected.slice(24)));
+        // Ignore the timestamp bytes (19 -> 22)
+        assert(result.slice(0, 19).equals(expected.slice(0, 19)));
+        assert(result.slice(22).equals(expected.slice(22)));
         done();
     });
 
